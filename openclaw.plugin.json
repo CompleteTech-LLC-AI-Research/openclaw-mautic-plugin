@@ -61,33 +61,72 @@
         "default": 60,
         "description": "Timeout for Mautic HTTP API and dashboard probes."
       },
-      "allowedConsoleCommands": {
-        "type": "array",
-        "uniqueItems": true,
-        "default": [
-          "cache:clear",
-          "mautic:cache:clear",
-          "migrations:status",
-          "webhooks:process",
-          "campaigns:rebuild",
-          "campaigns:trigger",
-          "segments:update",
-          "plugins:reload"
-        ],
-        "items": {
-          "type": "string",
-          "enum": [
-            "cache:clear",
-            "mautic:cache:clear",
-            "migrations:status",
-            "webhooks:process",
-            "campaigns:rebuild",
-            "campaigns:trigger",
-            "segments:update",
-            "plugins:reload"
-          ]
-        },
-        "description": "Optional narrower command policy. Commands must also be in the plugin's hardcoded safe allowlist."
+      "consoleCommandPolicy": {
+        "type": "string",
+        "enum": ["readOnly", "maintenance", "automation", "allSafe", "custom"],
+        "default": "maintenance",
+        "description": "Preset for safe Mautic console commands. Use custom only when enabling individual grouped toggles below."
+      },
+      "consoleCommandGroups": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Advanced custom console command toggles. Used only when consoleCommandPolicy is custom.",
+        "properties": {
+          "maintenance": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Safe maintenance commands.",
+            "properties": {
+              "cacheClear": {
+                "type": "boolean",
+                "default": false,
+                "description": "Allow cache:clear."
+              },
+              "mauticCacheClear": {
+                "type": "boolean",
+                "default": false,
+                "description": "Allow mautic:cache:clear."
+              },
+              "migrationsStatus": {
+                "type": "boolean",
+                "default": false,
+                "description": "Allow migrations:status."
+              },
+              "pluginsReload": {
+                "type": "boolean",
+                "default": false,
+                "description": "Allow plugins:reload."
+              }
+            }
+          },
+          "automation": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Safe background automation commands.",
+            "properties": {
+              "webhooksProcess": {
+                "type": "boolean",
+                "default": false,
+                "description": "Allow webhooks:process."
+              },
+              "campaignsRebuild": {
+                "type": "boolean",
+                "default": false,
+                "description": "Allow campaigns:rebuild."
+              },
+              "campaignsTrigger": {
+                "type": "boolean",
+                "default": false,
+                "description": "Allow campaigns:trigger."
+              },
+              "segmentsUpdate": {
+                "type": "boolean",
+                "default": false,
+                "description": "Allow segments:update."
+              }
+            }
+          }
+        }
       }
     }
   }

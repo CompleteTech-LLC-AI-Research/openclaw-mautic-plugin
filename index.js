@@ -31,6 +31,36 @@ const CONSOLE_COMMANDS = [
   "segments:update",
   "plugins:reload",
 ];
+const CONSOLE_COMMAND_POLICIES = ["readOnly", "maintenance", "automation", "allSafe", "custom"];
+const CONSOLE_POLICY_COMMANDS = {
+  readOnly: ["migrations:status"],
+  maintenance: ["migrations:status", "cache:clear", "mautic:cache:clear", "plugins:reload"],
+  automation: [
+    "migrations:status",
+    "cache:clear",
+    "mautic:cache:clear",
+    "plugins:reload",
+    "webhooks:process",
+    "campaigns:rebuild",
+    "campaigns:trigger",
+    "segments:update",
+  ],
+  allSafe: CONSOLE_COMMANDS,
+};
+const CONSOLE_GROUP_COMMANDS = {
+  maintenance: {
+    cacheClear: "cache:clear",
+    mauticCacheClear: "mautic:cache:clear",
+    migrationsStatus: "migrations:status",
+    pluginsReload: "plugins:reload",
+  },
+  automation: {
+    webhooksProcess: "webhooks:process",
+    campaignsRebuild: "campaigns:rebuild",
+    campaignsTrigger: "campaigns:trigger",
+    segmentsUpdate: "segments:update",
+  },
+};
 const DEFAULT_CONFIG = {
   baseUrl: "http://mautic_web",
   consoleUrl: "http://mautic_console:8099/console",
@@ -38,7 +68,7 @@ const DEFAULT_CONFIG = {
   allowedWorkspaceRoot: "/workspace/mautic",
   defaultApiVersion: "legacy",
   requestTimeoutSeconds: 60,
-  allowedConsoleCommands: CONSOLE_COMMANDS,
+  consoleCommandPolicy: "maintenance",
 };
 const REQUEST_TIMEOUT_MIN_SECONDS = 5;
 const REQUEST_TIMEOUT_MAX_SECONDS = 600;
@@ -68,9 +98,33 @@ function pickEnum(value, allowed, fallback) {
   return allowed.includes(value) ? value : fallback;
 }
 
-function normalizeConsoleCommands(value) {
-  if (!Array.isArray(value)) return DEFAULT_CONFIG.allowedConsoleCommands;
-  return value.filter((command, index) => CONSOLE_COMMANDS.includes(command) && value.indexOf(command) === index);
+function uniqueSafeCommands(commands) {
+  return commands.filter((command, index) => CONSOLE_COMMANDS.includes(command) && commands.indexOf(command) === index);
+}
+
+function commandsFromGroups(groups) {
+  if (!groups || typeof groups !== "object") return [];
+  const commands = [];
+  for (const [groupName, fields] of Object.entries(CONSOLE_GROUP_COMMANDS)) {
+    const group = groups[groupName];
+    if (!group || typeof group !== "object") continue;
+    for (const [fieldName, command] of Object.entries(fields)) {
+      if (group[fieldName] === true) commands.push(command);
+    }
+  }
+  return uniqueSafeCommands(commands);
+}
+
+function resolveConsoleCommands(pluginConfig) {
+  const policy = pickEnum(
+    pluginConfig.consoleCommandPolicy || process.env.MAUTIC_CONSOLE_COMMAND_POLICY,
+    CONSOLE_COMMAND_POLICIES,
+    DEFAULT_CONFIG.consoleCommandPolicy,
+  );
+  const commands = policy === "custom"
+    ? commandsFromGroups(pluginConfig.consoleCommandGroups)
+    : CONSOLE_POLICY_COMMANDS[policy];
+  return { policy, commands: uniqueSafeCommands(commands || []) };
 }
 
 function stripTrailingSlash(value) {
@@ -86,6 +140,7 @@ function getRuntimeConfig(api) {
     || nonEmptyString(process.env.MAUTIC_ALLOWED_WORKSPACE_ROOT)
     || DEFAULT_CONFIG.allowedWorkspaceRoot;
   assertPathWithinRoot(workspaceRoot, allowedWorkspaceRoot, "Configured workspaceRoot escapes allowedWorkspaceRoot");
+  const consolePolicy = resolveConsoleCommands(pluginConfig);
   return {
     baseUrl: stripTrailingSlash(nonEmptyString(pluginConfig.baseUrl) || nonEmptyString(process.env.MAUTIC_BASE_URL) || DEFAULT_CONFIG.baseUrl),
     username: process.env.MAUTIC_API_USERNAME || "",
@@ -105,7 +160,8 @@ function getRuntimeConfig(api) {
       REQUEST_TIMEOUT_MIN_SECONDS,
       REQUEST_TIMEOUT_MAX_SECONDS,
     ),
-    allowedConsoleCommands: normalizeConsoleCommands(pluginConfig.allowedConsoleCommands),
+    consoleCommandPolicy: consolePolicy.policy,
+    allowedConsoleCommands: consolePolicy.commands,
   };
 }
 
@@ -255,6 +311,7 @@ export default definePluginEntry({
           allowedWorkspaceRoot: config.allowedWorkspaceRoot,
           defaultApiVersion: config.defaultApiVersion,
           requestTimeoutSeconds: config.requestTimeoutSeconds,
+          consoleCommandPolicy: config.consoleCommandPolicy,
           allowedConsoleCommands: config.allowedConsoleCommands,
         });
       },
