@@ -1,0 +1,32 @@
+{
+  "id": "mautic-control",
+  "name": "Mautic Control",
+  "description": "Typed tools for controlling the local Mautic stack through its REST APIs and safe maintenance bridge.",
+  "version": "0.1.0",
+  "contracts": {
+    "tools": [
+      "mautic_status",
+      "mautic_request",
+      "mautic_entity",
+      "mautic_webhook_triggers",
+      "mautic_console",
+      "mautic_workspace_file"
+    ]
+  },
+  "toolMetadata": {
+    "mautic_status": { "optional": true },
+    "mautic_request": { "optional": true },
+    "mautic_entity": { "optional": true },
+    "mautic_webhook_triggers": { "optional": true },
+    "mautic_console": { "optional": true },
+    "mautic_workspace_file": { "optional": true }
+  },
+  "activation": {
+    "onStartup": true
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

@@ -1,0 +1,38 @@
+flowchart LR
+  user[Operator]
+  openclaw[OpenClaw Gateway<br/>agent + dashboard]
+  skill[mautic-control skill<br/>procedures + examples]
+  plugin[OpenClaw Mautic plugin<br/>typed tools]
+  client[Mautic API client<br/>auth + request wrapper]
+  api[Mautic REST API<br/>/api and /api/v2]
+  hooks[Mautic webhooks<br/>/api/hooks + event triggers]
+  cli[Mautic console<br/>cron, imports, cache, plugins]
+  db[(MariaDB)]
+  workspace[(Shared workspace<br/>files, skills, mautic)]
+
+  user -->|natural language| openclaw
+  openclaw -->|loads guidance| skill
+  openclaw -->|calls tools| plugin
+  plugin -->|read/write entities| client
+  client -->|contacts, segments, campaigns,<br/>emails, forms, assets, reports| api
+  client -->|create and manage outbound events| hooks
+  plugin -->|maintenance and bulk jobs| cli
+  api --> db
+  hooks --> db
+  cli --> db
+  plugin -->|import/export staging| workspace
+  openclaw --> workspace
+
+  subgraph Control["Control coverage"]
+    c1[CRUD any API resource]
+    c2[Bulk import/export]
+    c3[Campaign and segment operations]
+    c4[Webhook event wiring]
+    c5[Health checks and audits]
+  end
+
+  plugin --> c1
+  plugin --> c2
+  plugin --> c3
+  plugin --> c4
+  plugin --> c5
