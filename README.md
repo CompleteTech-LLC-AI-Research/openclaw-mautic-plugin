@@ -13,13 +13,25 @@ Native OpenClaw tool plugin for the local Docker Mautic stack.
 
 ## Configuration
 
-The plugin reads these environment variables from the OpenClaw container:
+OpenClaw shows these non-secret fields in the plugin settings UI under `mautic-control`:
 
-- `MAUTIC_BASE_URL`, default `http://mautic_web`
+- `baseUrl`, default `http://mautic_web`
+- `consoleUrl`, default `http://mautic_console:8099/console`
+- `workspaceRoot`, default `/workspace/mautic`
+- `allowedWorkspaceRoot`, default `/workspace/mautic`
+- `defaultApiVersion`, `legacy` or `v2`, default `legacy`
+- `requestTimeoutSeconds`, 5 to 600 seconds, default `60`
+- `allowedConsoleCommands`, a subset of the safe command allowlist
+
+The runtime resolves plugin UI config first, environment variables second, and built-in defaults last. `allowedConsoleCommands` can only narrow the hardcoded safe list: `cache:clear`, `mautic:cache:clear`, `migrations:status`, `webhooks:process`, `campaigns:rebuild`, `campaigns:trigger`, `segments:update`, and `plugins:reload`.
+
+Secrets stay out of the plugin UI. The installed OpenClaw runtime exposes plugin config as `api.pluginConfig`, but its canonical SecretRef credential surface does not include this custom plugin's Mautic password or console-token paths. This plugin therefore does not add plaintext secret fields. Provide credentials through the OpenClaw container environment:
+
 - `MAUTIC_API_USERNAME`
 - `MAUTIC_API_PASSWORD`
-- `MAUTIC_CONSOLE_URL`, default `http://mautic_console:8099/console`
 - `MAUTIC_CONSOLE_TOKEN`
+
+Optional environment fallbacks for non-secret settings are `MAUTIC_BASE_URL`, `MAUTIC_CONSOLE_URL`, `MAUTIC_WORKSPACE_DIR`, `MAUTIC_ALLOWED_WORKSPACE_ROOT`, `MAUTIC_DEFAULT_API_VERSION`, and `MAUTIC_REQUEST_TIMEOUT_SECONDS`.
 
 The stack enables Mautic Basic auth only for this loopback Docker deployment. Do not expose these services publicly.
 
@@ -33,6 +45,14 @@ openclaw gateway call tools.invoke --json --params '{"name":"mautic_status","arg
 
 ```json
 { "tool": "mautic_status", "args": {} }
+```
+
+```bash
+openclaw gateway call tools.invoke --json --params '{"name":"mautic_request","args":{"path":"/api/contacts","query":{"limit":1}}}'
+```
+
+```bash
+openclaw gateway call tools.invoke --json --params '{"name":"mautic_request","args":{"path":"/api/v2/contacts","query":{"itemsPerPage":1}}}'
 ```
 
 ```json
@@ -58,6 +78,10 @@ openclaw gateway call tools.invoke --json --params '{"name":"mautic_status","arg
 { "tool": "mautic_console", "args": { "command": "migrations:status" } }
 ```
 
+```json
+{ "tool": "mautic_workspace_file", "args": { "action": "write", "path": "notes/example.txt", "content": "staged from OpenClaw" } }
+```
+
 Equivalent gateway call:
 
 ```bash
@@ -68,4 +92,7 @@ openclaw gateway call tools.invoke --json --params '{"name":"mautic_console","ar
 
 - OAuth2 is preferred for external Mautic integrations, but the local verification path uses Basic auth to avoid a manual OAuth approval loop.
 - `mautic_console` is intentionally allowlisted. It cannot run arbitrary shell or console commands.
+- `mautic_request` is restricted to `/api` and `/api/v2` paths.
+- `mautic_workspace_file` is restricted to `workspaceRoot` and the broader `allowedWorkspaceRoot`.
 - `mautic_entity` uses Mautic's legacy `/api` patterns by default and supports `/api/v2` through the `apiVersion` argument when needed.
+- Plaintext password and console-token UI fields are intentionally not implemented. Use environment variables unless a future deployed OpenClaw version adds a dedicated SecretRef target for this plugin.

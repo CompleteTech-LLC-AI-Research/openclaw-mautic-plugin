@@ -31,6 +31,17 @@ const CONSOLE_COMMANDS = [
   "segments:update",
   "plugins:reload",
 ];
+const DEFAULT_CONFIG = {
+  baseUrl: "http://mautic_web",
+  consoleUrl: "http://mautic_console:8099/console",
+  workspaceRoot: "/workspace/mautic",
+  allowedWorkspaceRoot: "/workspace/mautic",
+  defaultApiVersion: "legacy",
+  requestTimeoutSeconds: 60,
+  allowedConsoleCommands: CONSOLE_COMMANDS,
+};
+const REQUEST_TIMEOUT_MIN_SECONDS = 5;
+const REQUEST_TIMEOUT_MAX_SECONDS = 600;
 
 function textResult(payload) {
   return {
@@ -43,14 +54,58 @@ function schema(properties, required = []) {
   return { type: "object", additionalProperties: false, properties, required };
 }
 
-function getEnv() {
+function nonEmptyString(value) {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function boundedNumber(value, fallback, min, max) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, parsed));
+}
+
+function pickEnum(value, allowed, fallback) {
+  return allowed.includes(value) ? value : fallback;
+}
+
+function normalizeConsoleCommands(value) {
+  if (!Array.isArray(value)) return DEFAULT_CONFIG.allowedConsoleCommands;
+  return value.filter((command, index) => CONSOLE_COMMANDS.includes(command) && value.indexOf(command) === index);
+}
+
+function stripTrailingSlash(value) {
+  return value.replace(/\/+$/, "");
+}
+
+function getRuntimeConfig(api) {
+  const pluginConfig = api?.pluginConfig && typeof api.pluginConfig === "object" ? api.pluginConfig : {};
+  const workspaceRoot = nonEmptyString(pluginConfig.workspaceRoot)
+    || nonEmptyString(process.env.MAUTIC_WORKSPACE_DIR)
+    || DEFAULT_CONFIG.workspaceRoot;
+  const allowedWorkspaceRoot = nonEmptyString(pluginConfig.allowedWorkspaceRoot)
+    || nonEmptyString(process.env.MAUTIC_ALLOWED_WORKSPACE_ROOT)
+    || DEFAULT_CONFIG.allowedWorkspaceRoot;
+  assertPathWithinRoot(workspaceRoot, allowedWorkspaceRoot, "Configured workspaceRoot escapes allowedWorkspaceRoot");
   return {
-    baseUrl: (process.env.MAUTIC_BASE_URL || "http://mautic_web").replace(/\/+$/, ""),
+    baseUrl: stripTrailingSlash(nonEmptyString(pluginConfig.baseUrl) || nonEmptyString(process.env.MAUTIC_BASE_URL) || DEFAULT_CONFIG.baseUrl),
     username: process.env.MAUTIC_API_USERNAME || "",
     password: process.env.MAUTIC_API_PASSWORD || "",
-    consoleUrl: process.env.MAUTIC_CONSOLE_URL || "http://mautic_console:8099/console",
+    consoleUrl: nonEmptyString(pluginConfig.consoleUrl) || nonEmptyString(process.env.MAUTIC_CONSOLE_URL) || DEFAULT_CONFIG.consoleUrl,
     consoleToken: process.env.MAUTIC_CONSOLE_TOKEN || "",
-    workspaceRoot: process.env.MAUTIC_WORKSPACE_DIR || "/workspace/mautic",
+    workspaceRoot,
+    allowedWorkspaceRoot,
+    defaultApiVersion: pickEnum(
+      pluginConfig.defaultApiVersion || process.env.MAUTIC_DEFAULT_API_VERSION,
+      ["legacy", "v2"],
+      DEFAULT_CONFIG.defaultApiVersion,
+    ),
+    requestTimeoutSeconds: boundedNumber(
+      pluginConfig.requestTimeoutSeconds || process.env.MAUTIC_REQUEST_TIMEOUT_SECONDS,
+      DEFAULT_CONFIG.requestTimeoutSeconds,
+      REQUEST_TIMEOUT_MIN_SECONDS,
+      REQUEST_TIMEOUT_MAX_SECONDS,
+    ),
+    allowedConsoleCommands: normalizeConsoleCommands(pluginConfig.allowedConsoleCommands),
   };
 }
 
@@ -75,11 +130,20 @@ function buildUrl(baseUrl, requestPath, query = {}) {
   return url;
 }
 
-async function mauticFetch(requestPath, options = {}) {
-  const env = getEnv();
+async function fetchWithTimeout(url, init, timeoutSeconds) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutSeconds * 1000);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function mauticFetch(config, requestPath, options = {}) {
   const headers = {
     Accept: "application/json",
-    Authorization: authHeader(env),
+    Authorization: authHeader(config),
     ...(options.headers || {}),
   };
   const init = { method: options.method || "GET", headers };
@@ -87,8 +151,8 @@ async function mauticFetch(requestPath, options = {}) {
     headers["Content-Type"] = "application/json";
     init.body = JSON.stringify(options.body);
   }
-  const url = buildUrl(env.baseUrl, requestPath, options.query);
-  const response = await fetch(url, init);
+  const url = buildUrl(config.baseUrl, requestPath, options.query);
+  const response = await fetchWithTimeout(url, init, config.requestTimeoutSeconds);
   const text = await response.text();
   let body = text;
   try {
@@ -158,6 +222,14 @@ function safeWorkspacePath(root, relativePath = ".") {
   return resolved;
 }
 
+function assertPathWithinRoot(target, root, message) {
+  const resolved = path.resolve(target);
+  const rootResolved = path.resolve(root);
+  if (resolved !== rootResolved && !resolved.startsWith(`${rootResolved}${path.sep}`)) {
+    throw new Error(message);
+  }
+}
+
 export default definePluginEntry({
   id: "mautic-control",
   name: "Mautic Control",
@@ -168,18 +240,22 @@ export default definePluginEntry({
       description: "Check local Mautic dashboard reachability, API authentication, and plugin environment wiring.",
       parameters: schema({}),
       async execute() {
-        const env = getEnv();
-        const dashboard = await fetch(`${env.baseUrl}/s/dashboard`, { redirect: "manual" })
+        const config = getRuntimeConfig(api);
+        const dashboard = await fetchWithTimeout(`${config.baseUrl}/s/dashboard`, { redirect: "manual" }, config.requestTimeoutSeconds)
           .then((response) => ({ ok: response.status === 200 || response.status === 302, status: response.status, location: response.headers.get("location") }))
           .catch((error) => ({ ok: false, error: error.message }));
-        const apiProbe = await mauticFetch("/api/contacts", { query: { limit: 1 } });
+        const apiProbe = await mauticFetch(config, "/api/contacts", { query: { limit: 1 } });
         return textResult({
           ok: dashboard.ok && apiProbe.ok,
-          baseUrl: env.baseUrl,
+          baseUrl: config.baseUrl,
           dashboard,
           api: { ok: apiProbe.ok, status: apiProbe.status, statusText: apiProbe.statusText },
-          consoleBridgeConfigured: Boolean(env.consoleUrl && env.consoleToken),
-          workspaceRoot: env.workspaceRoot,
+          consoleBridgeConfigured: Boolean(config.consoleUrl && config.consoleToken),
+          workspaceRoot: config.workspaceRoot,
+          allowedWorkspaceRoot: config.allowedWorkspaceRoot,
+          defaultApiVersion: config.defaultApiVersion,
+          requestTimeoutSeconds: config.requestTimeoutSeconds,
+          allowedConsoleCommands: config.allowedConsoleCommands,
         });
       },
     }, { optional: true });
@@ -198,7 +274,7 @@ export default definePluginEntry({
         if (!requestPath.startsWith("/api/") && !requestPath.startsWith("/api/v2/") && requestPath !== "/api" && requestPath !== "/api/v2") {
           throw new Error("mautic_request path must start with /api or /api/v2");
         }
-        const result = await mauticFetch(requestPath, {
+        const result = await mauticFetch(getRuntimeConfig(api), requestPath, {
           method: params.method || "GET",
           query: params.query,
           body: params.body,
@@ -219,13 +295,14 @@ export default definePluginEntry({
         body: { type: "object", additionalProperties: true },
       }, ["entity", "action"]),
       async execute(_id, params) {
+        const config = getRuntimeConfig(api);
         const action = params.action;
-        const apiVersion = params.apiVersion || "legacy";
+        const apiVersion = params.apiVersion || config.defaultApiVersion;
         requireId(action, params.id);
         const request = apiVersion === "v2"
           ? v2EntityRequest(params.entity, action, params.id)
           : legacyEntityRequest(params.entity, action, params.id);
-        const result = await mauticFetch(request.path, {
+        const result = await mauticFetch(config, request.path, {
           method: request.method,
           query: params.query,
           body: params.body,
@@ -239,7 +316,7 @@ export default definePluginEntry({
       description: "List valid Mautic webhook trigger events.",
       parameters: schema({}),
       async execute() {
-        const result = await mauticFetch("/api/hooks/triggers");
+        const result = await mauticFetch(getRuntimeConfig(api), "/api/hooks/triggers");
         return textResult(result);
       },
     }, { optional: true });
@@ -252,16 +329,19 @@ export default definePluginEntry({
         timeoutSeconds: { type: "number", minimum: 5, maximum: 600, default: 300 },
       }, ["command"]),
       async execute(_id, params) {
-        const env = getEnv();
-        if (!env.consoleToken) throw new Error("MAUTIC_CONSOLE_TOKEN must be set");
-        const response = await fetch(env.consoleUrl, {
+        const config = getRuntimeConfig(api);
+        if (!config.allowedConsoleCommands.includes(params.command) || !CONSOLE_COMMANDS.includes(params.command)) {
+          throw new Error("Command is not allowed by the Mautic console policy");
+        }
+        if (!config.consoleToken) throw new Error("MAUTIC_CONSOLE_TOKEN must be set");
+        const response = await fetchWithTimeout(config.consoleUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-Mautic-Console-Token": env.consoleToken,
+            "X-Mautic-Console-Token": config.consoleToken,
           },
           body: JSON.stringify({ command: params.command, timeoutSeconds: params.timeoutSeconds || 300 }),
-        });
+        }, boundedNumber(params.timeoutSeconds || 300, 300, REQUEST_TIMEOUT_MIN_SECONDS, REQUEST_TIMEOUT_MAX_SECONDS));
         const body = await response.json().catch(() => null);
         return textResult({ ok: response.ok && Boolean(body?.ok), status: response.status, body });
       },
@@ -276,8 +356,9 @@ export default definePluginEntry({
         content: { type: "string" },
       }, ["action"]),
       async execute(_id, params) {
-        const env = getEnv();
-        const target = safeWorkspacePath(env.workspaceRoot, params.path || ".");
+        const config = getRuntimeConfig(api);
+        const target = safeWorkspacePath(config.workspaceRoot, params.path || ".");
+        assertPathWithinRoot(target, config.allowedWorkspaceRoot, "Path escapes the allowed Mautic workspace root");
         if (params.action === "list") {
           const entries = await readdir(target, { withFileTypes: true });
           return textResult({
