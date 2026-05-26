@@ -4,6 +4,7 @@
 
 - Added GitHub Actions OIDC trusted publishing for ClawHub.
 - Added a manual ClawHub publish workflow that validates locally, then calls ClawHub's official reusable publish workflow.
+- Updated the workflow to publish the ClawPack `.tgz` artifact through the official ClawHub reusable workflow.
 - Documented trusted publisher configuration and verification.
 
 ## 0.1.7 - 2026-05-26

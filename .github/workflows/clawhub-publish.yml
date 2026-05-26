@@ -3,6 +3,9 @@ name: Publish to ClawHub
 on:
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 permissions:
   contents: read
   id-token: write
@@ -36,7 +39,11 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: openclaw/clawhub/.github/workflows/package-publish.yml@v0.12.0
+    uses: openclaw/clawhub/.github/workflows/package-publish.yml@v0.18.0
     with:
+      source: ./clawpack/completetech-openclaw-mautic-plugin-0.1.8.tgz
       dry_run: false
+      source_repo: CompleteTech-LLC-AI-Research/openclaw-mautic-plugin
+      source_commit: ${{ github.sha }}
+      source_ref: ${{ github.ref }}
       tags: latest,mautic,marketing-automation,crm,webhooks,openclaw

@@ -194,12 +194,16 @@ The package is published on ClawHub as `@completetech/openclaw-mautic-plugin`.
 
 Releases are published as a ClawPack npm-pack artifact, not the older legacy zip artifact.
 Trusted publishing uses GitHub Actions OIDC; no long-lived ClawHub token is stored in repository secrets.
+The GitHub workflow publishes the checked-in `clawpack/` tarball through ClawHub's official reusable workflow so the release can use both official OIDC and the `npm-pack` artifact path.
 
 For a future release:
 
 ```bash
 npm run readiness:check
-npm run clawhub:publish
+rm -rf clawpack
+mkdir -p clawpack
+npm exec --yes clawhub -- package pack . --pack-destination clawpack --json
+gh workflow run clawhub-publish.yml --ref main
 ```
 
 Optional publish environment variables are `CLAWHUB_OWNER`, `CLAWHUB_CHANGELOG`, `CLAWHUB_SOURCE_REPO`, `CLAWHUB_SOURCE_REF`, `CLAWHUB_TAGS`, `CLAWHUB_CLAWSCAN_NOTE`, and `CLAWHUB_ALLOW_PRIVATE_SOURCE`.
