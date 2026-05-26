@@ -91,3 +91,5 @@ Gateway auth rate limiting is configured:
 Do not publish this package publicly to ClawHub while the repository remains private unless ClawHub has an approved private-source review workflow for this owner.
 
 `npm run clawhub:publish` enforces that decision by refusing private-source publishing unless `CLAWHUB_ALLOW_PRIVATE_SOURCE=1` is set after review access is approved.
+
+If the repository stays private, use `docs/PRIVATE_SOURCE_REVIEW_REQUEST.md` as the handoff packet for ClawHub private-source review.
