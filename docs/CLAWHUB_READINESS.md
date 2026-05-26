@@ -10,7 +10,7 @@ Current repository:
 
 - `CompleteTech-LLC-AI-Research/openclaw-mautic-plugin`
 - Visibility: private
-- Latest readiness commit: `1dc3f30`
+- Latest pushed branch: `main`
 
 ## Passing Checks
 
@@ -47,12 +47,12 @@ GitHub repo not found: CompleteTech-LLC-AI-Research/openclaw-mautic-plugin
 
 GitHub reports the repository exists but is private. ClawHub community publishing expects source metadata that ClawHub can fetch and review. To finish public deployment, either make the repository public or configure a private-source review path supported by ClawHub.
 
-Local-folder dry run with explicit source metadata:
+Local-folder dry run with explicit source metadata was last validated at commit `32326ba63ab4f1895aa0af869506eaee5f00f457`:
 
 ```bash
 npm exec --yes clawhub -- package publish . --dry-run --json \
   --source-repo CompleteTech-LLC-AI-Research/openclaw-mautic-plugin \
-  --source-commit fd9d46b9aa8935e0f433a14c3a0ee0e7cde66ae8 \
+  --source-commit 32326ba63ab4f1895aa0af869506eaee5f00f457 \
   --source-ref main
 ```
 
@@ -64,8 +64,9 @@ Result: passed. ClawHub detected:
   "displayName": "Mautic Control",
   "family": "bundle-plugin",
   "version": "0.1.0",
+  "commit": "32326ba63ab4f1895aa0af869506eaee5f00f457",
   "files": 17,
-  "totalBytes": 333166
+  "totalBytes": 333823
 }
 ```
 
