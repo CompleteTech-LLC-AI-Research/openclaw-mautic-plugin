@@ -8,7 +8,7 @@ This package is configured for GitHub Actions OIDC trusted publishing.
 - Repository: `CompleteTech-LLC-AI-Research/openclaw-mautic-plugin`
 - Workflow file: `clawhub-publish.yml`
 - Artifact format: ClawPack `npm-pack` `.tgz`
-- Workflow artifact: `./clawpack/completetech-openclaw-mautic-plugin-0.1.8.tgz`
+- Workflow artifact: `./clawpack/completetech-openclaw-mautic-plugin-0.1.9.tgz`
 
 ## Workflow
 
@@ -50,6 +50,20 @@ Current limitation: ClawHub's official reusable workflow does not expose a
 `clawscan_note` input. The local `npm run clawhub:publish` wrapper still includes
 the scan note for manual reviewed publishes, but trusted OIDC publishes through
 the official workflow cannot attach that note until ClawHub adds the input.
+
+## Current Verification Status
+
+The trusted workflow publish proved that ClawHub accepts the official
+OIDC workflow and records the correct source commit, but ClawHub still reports
+`verification.scope` as `artifact-only` and `hasProvenance` as `false` for this
+community `bundle-plugin` ClawPack release. The package readiness API separately
+passes the source provenance check and reports the official-channel status as the
+only blocker.
+
+Treat the current ClawHub-side limitation as: trusted GitHub Actions publishing
+is active and source-linked, but ClawHub has not upgraded community ClawPack
+bundle releases from `artifact-only` verification to provenance-backed
+verification.
 
 ## Trusted Publisher Config
 

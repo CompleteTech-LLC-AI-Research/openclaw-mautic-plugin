@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.9 - 2026-05-26
+
+- Excluded local release helper scripts from the published ClawPack artifact to reduce ClawHub static-scan noise.
+- Documented that ClawHub still reports community ClawPack bundle releases as `artifact-only` even after official OIDC trusted publishing.
+
 ## 0.1.8 - 2026-05-26
 
 - Added GitHub Actions OIDC trusted publishing for ClawHub.

@@ -196,6 +196,8 @@ Releases are published as a ClawPack npm-pack artifact, not the older legacy zip
 Trusted publishing uses GitHub Actions OIDC; no long-lived ClawHub token is stored in repository secrets.
 The GitHub workflow publishes the checked-in `clawpack/` tarball through ClawHub's official reusable workflow so the release can use both official OIDC and the `npm-pack` artifact path.
 
+Current ClawHub behavior: the release is source-linked to the GitHub commit and passes ClawHub's source provenance readiness check, but community ClawPack bundle releases still display `artifact-only` verification with `hasProvenance=false`.
+
 For a future release:
 
 ```bash

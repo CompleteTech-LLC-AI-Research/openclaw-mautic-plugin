@@ -41,7 +41,7 @@ jobs:
       id-token: write
     uses: openclaw/clawhub/.github/workflows/package-publish.yml@v0.18.0
     with:
-      source: ./clawpack/completetech-openclaw-mautic-plugin-0.1.8.tgz
+      source: ./clawpack/completetech-openclaw-mautic-plugin-0.1.9.tgz
       dry_run: false
       source_repo: CompleteTech-LLC-AI-Research/openclaw-mautic-plugin
       source_commit: ${{ github.sha }}
