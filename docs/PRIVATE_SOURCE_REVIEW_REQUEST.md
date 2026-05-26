@@ -1,6 +1,6 @@
 # Private Source Review Request
 
-Use this when requesting a ClawHub private-source review path for `mautic-control`.
+Historical/alternate handoff only. The repository is currently public, so this private-source path is not needed for standard ClawHub review. Use this if the repository is made private again and ClawHub supports private-source review for `mautic-control`.
 
 ## Package
 
@@ -8,12 +8,12 @@ Use this when requesting a ClawHub private-source review path for `mautic-contro
 - Plugin id: `mautic-control`
 - Version: `0.1.0`
 - Source repository: `CompleteTech-LLC-AI-Research/openclaw-mautic-plugin`
-- Current source visibility: private
+- Current source visibility: public
 - Branch: `main`
 
 ## Reason For Private Source
 
-CompleteTech LLC AI Research is keeping the source repository private unless ClawHub requires a public source repository for marketplace listing. The package is prepared for review with explicit source metadata and a reproducible local ClawHub dry run.
+CompleteTech LLC AI Research may make the source repository private again after review. The package is prepared for review with explicit source metadata and reproducible local and GitHub-source ClawHub dry runs.
 
 ## Review Commands
 
@@ -33,7 +33,7 @@ npm run live:smoke
 docker compose exec -T openclaw sh -lc 'openclaw security audit --deep --json'
 ```
 
-The public-source gate is expected to fail until ClawHub can access the repository:
+If the repository is public, the readiness gate should pass:
 
 ```bash
 npm run readiness:check

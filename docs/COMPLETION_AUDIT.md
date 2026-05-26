@@ -6,12 +6,7 @@ Objective: make the `mautic-control` OpenClaw plugin production-ready for ClawHu
 
 ## Result
 
-The plugin package is production-prepped for ClawHub package review and private/internal OpenClaw deployment. Public ClawHub listing remains blocked because the GitHub source repository is private and direct ClawHub GitHub-source dry-run cannot fetch it.
-
-Do not mark public ClawHub deployment complete until one of these is true:
-
-- The repository is made public.
-- ClawHub has an approved private-source review path for `CompleteTech-LLC-AI-Research/openclaw-mautic-plugin`.
+The plugin package is production-ready for ClawHub package review from the public GitHub repository. Local stack behavior is preserved, production defaults are restrictive, and the direct GitHub-source ClawHub dry run passes.
 
 ## Prompt-To-Artifact Checklist
 
@@ -41,7 +36,8 @@ Do not mark public ClawHub deployment complete until one of these is true:
 | CI workflow | `.github/workflows/ci.yml` runs lint, tests, and package validation | Complete |
 | ClawHub dry-run | `npm run clawhub:dry-run` passes from local folder with source metadata | Complete |
 | Accidental publish guard | `npm run clawhub:publish` refuses private source unless `CLAWHUB_ALLOW_PRIVATE_SOURCE=1` is set after private-source review approval | Complete |
-| Direct GitHub-source ClawHub dry-run | `clawhub package publish CompleteTech-LLC-AI-Research/openclaw-mautic-plugin --dry-run` fails because repo is private | Blocked |
+| Direct GitHub-source ClawHub dry-run | `clawhub package publish CompleteTech-LLC-AI-Research/openclaw-mautic-plugin --dry-run` passes from public `main` | Complete |
+| Public source access | GitHub repo visibility is public and `npm run readiness:check` verifies ClawHub can fetch it | Complete |
 | Repo clean and pushed | `git status --short --branch` reports `main...origin/main` after latest push | Complete |
 
 ## Latest Verification Commands

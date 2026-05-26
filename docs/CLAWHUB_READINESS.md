@@ -4,12 +4,12 @@ Last audited: 2026-05-26
 
 ## Status
 
-The plugin package and local OpenClaw/Mautic stack are ready for ClawHub review, but public ClawHub deployment is blocked until the source repository is accessible to ClawHub.
+The plugin package, public GitHub source, and local OpenClaw/Mautic stack are ready for ClawHub review.
 
 Current repository:
 
 - `CompleteTech-LLC-AI-Research/openclaw-mautic-plugin`
-- Visibility: private
+- Visibility: public
 - Latest pushed branch: `main`
 
 ## Passing Checks
@@ -18,7 +18,7 @@ Current repository:
 - `npm run lint`
 - `npm run package:check`
 - `npm run live:smoke`
-- `npm run readiness:check` fails only on the public-source review blocker while the repo remains private
+- `npm run readiness:check`
 - `node scripts/audit.mjs`
 - `node scripts/audit.mjs --live`
 - `openclaw plugins doctor`
@@ -42,11 +42,17 @@ npm exec --yes clawhub -- package publish CompleteTech-LLC-AI-Research/openclaw-
 
 Result:
 
-```text
-GitHub repo not found: CompleteTech-LLC-AI-Research/openclaw-mautic-plugin
+```json
+{
+  "source": "github:CompleteTech-LLC-AI-Research/openclaw-mautic-plugin@main",
+  "name": "@completetech/openclaw-mautic-plugin",
+  "displayName": "Mautic Control",
+  "family": "bundle-plugin",
+  "version": "0.1.0"
+}
 ```
 
-GitHub reports the repository exists but is private. ClawHub community publishing expects source metadata that ClawHub can fetch and review. To finish public deployment, either make the repository public or configure a private-source review path supported by ClawHub.
+Result: passed. ClawHub can fetch and package the public GitHub source.
 
 Local-folder dry run with explicit source metadata:
 
@@ -65,7 +71,7 @@ Result: passed. ClawHub detected:
 }
 ```
 
-This validates the local package shape. It does not remove the public-source review concern for a public ClawHub listing.
+This validates the local package shape before publishing.
 
 ## Local Stack Security
 
@@ -88,8 +94,8 @@ Gateway auth rate limiting is configured:
 
 ## Deployment Decision
 
-Do not publish this package publicly to ClawHub while the repository remains private unless ClawHub has an approved private-source review workflow for this owner.
+The package is ready for ClawHub publish from the public `main` branch after an operator intentionally runs the publish command.
 
-`npm run clawhub:publish` enforces that decision by refusing private-source publishing unless `CLAWHUB_ALLOW_PRIVATE_SOURCE=1` is set after review access is approved.
+`npm run clawhub:publish` still guards against accidental private-source publishing if the repository visibility changes later.
 
-If the repository stays private, use `docs/PRIVATE_SOURCE_REVIEW_REQUEST.md` as the handoff packet for ClawHub private-source review.
+If the repository is made private again, use `docs/PRIVATE_SOURCE_REVIEW_REQUEST.md` as the handoff packet for a private-source review path.
