@@ -110,6 +110,7 @@ openclaw gateway call tools.invoke --json --params '{"name":"mautic_request","ar
 Run local package checks:
 
 ```bash
+npm run lint
 npm test
 npm run package:check
 ```
@@ -118,6 +119,7 @@ Run live checks from the companion stack after it is running:
 
 ```bash
 node scripts/audit.mjs
+npm run live:smoke
 docker compose exec -T openclaw sh -lc 'openclaw security audit --deep --json'
 ```
 

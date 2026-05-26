@@ -31,10 +31,13 @@
     "CHANGELOG.md",
     "docs/",
     "mautic/",
+    "scripts/",
     "skills/"
   ],
   "scripts": {
+    "lint": "node --check index.js && node --check lib/runtime.js && node --check scripts/live-smoke.mjs",
     "test": "node --test",
+    "live:smoke": "node scripts/live-smoke.mjs",
     "package:check": "npm pack --dry-run"
   },
   "openclaw": {

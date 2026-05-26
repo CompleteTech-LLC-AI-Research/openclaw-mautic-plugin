@@ -15,7 +15,9 @@ Current repository:
 ## Passing Checks
 
 - `npm test`
+- `npm run lint`
 - `npm run package:check`
+- `npm run live:smoke`
 - `node scripts/audit.mjs`
 - `node scripts/audit.mjs --live`
 - `openclaw plugins doctor`
@@ -29,9 +31,9 @@ The deep security audit currently reports:
 
 The remaining warning is `plugins.tools_reachable_permissive_policy`. This is expected while the local stack enables `mautic-control` tools in the default context for a trusted single-operator environment. For broader deployment, use restrictive OpenClaw profiles or explicit tool allowlists for agents that handle untrusted input.
 
-## ClawHub Dry Run
+## ClawHub Dry Runs
 
-Command attempted:
+Direct GitHub-source dry run:
 
 ```bash
 npm exec --yes clawhub -- package publish CompleteTech-LLC-AI-Research/openclaw-mautic-plugin --dry-run
@@ -44,6 +46,30 @@ GitHub repo not found: CompleteTech-LLC-AI-Research/openclaw-mautic-plugin
 ```
 
 GitHub reports the repository exists but is private. ClawHub community publishing expects source metadata that ClawHub can fetch and review. To finish public deployment, either make the repository public or configure a private-source review path supported by ClawHub.
+
+Local-folder dry run with explicit source metadata:
+
+```bash
+npm exec --yes clawhub -- package publish . --dry-run --json \
+  --source-repo CompleteTech-LLC-AI-Research/openclaw-mautic-plugin \
+  --source-commit fd9d46b9aa8935e0f433a14c3a0ee0e7cde66ae8 \
+  --source-ref main
+```
+
+Result: passed. ClawHub detected:
+
+```json
+{
+  "name": "@completetech/openclaw-mautic-plugin",
+  "displayName": "Mautic Control",
+  "family": "bundle-plugin",
+  "version": "0.1.0",
+  "files": 17,
+  "totalBytes": 333166
+}
+```
+
+This validates the local package shape. It does not remove the public-source review concern for a public ClawHub listing.
 
 ## Local Stack Security
 
