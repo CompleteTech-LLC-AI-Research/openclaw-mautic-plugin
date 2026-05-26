@@ -127,6 +127,7 @@ Before publishing to ClawHub, run the package dry-run wrapper and address all cr
 
 ```bash
 npm run clawhub:dry-run
+npm run readiness:check
 ```
 
 To publish after source visibility/review access is resolved and ClawHub login is configured:

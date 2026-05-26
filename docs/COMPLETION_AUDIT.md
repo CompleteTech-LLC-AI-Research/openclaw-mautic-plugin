@@ -54,6 +54,7 @@ npm test
 npm run package:check
 npm run live:smoke
 npm run clawhub:dry-run
+npm run readiness:check
 ```
 
 Run from `/mnt/c/Users/timot/Documents/projects/docker/openclaw-mautic-stack`:

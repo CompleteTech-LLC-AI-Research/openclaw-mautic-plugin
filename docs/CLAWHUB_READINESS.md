@@ -18,6 +18,7 @@ Current repository:
 - `npm run lint`
 - `npm run package:check`
 - `npm run live:smoke`
+- `npm run readiness:check` fails only on the public-source review blocker while the repo remains private
 - `node scripts/audit.mjs`
 - `node scripts/audit.mjs --live`
 - `openclaw plugins doctor`
