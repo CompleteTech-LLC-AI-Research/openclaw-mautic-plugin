@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4 - 2026-05-26
+
+- Published through ClawHub's newer ClawPack npm-pack artifact path.
+- Forced package publishing as a `code-plugin` so ClawHub stores the release as `.tgz` instead of legacy zip.
+- Updated readiness checks and publish wrapper to preserve the npm-pack artifact format.
+
 ## 0.1.3 - 2026-05-26
 
 - Improved the ClawHub README page with clearer compatibility, production setup, and operator safety sections.

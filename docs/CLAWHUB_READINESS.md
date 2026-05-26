@@ -47,8 +47,8 @@ Result:
   "source": "github:CompleteTech-LLC-AI-Research/openclaw-mautic-plugin@main",
   "name": "@completetech/openclaw-mautic-plugin",
   "displayName": "Mautic Control",
-  "family": "bundle-plugin",
-  "version": "0.1.3"
+  "family": "code-plugin",
+  "version": "0.1.4"
 }
 ```
 
@@ -66,8 +66,8 @@ Result: passed. ClawHub detected:
 {
   "name": "@completetech/openclaw-mautic-plugin",
   "displayName": "Mautic Control",
-  "family": "bundle-plugin",
-  "version": "0.1.3"
+  "family": "code-plugin",
+  "version": "0.1.4"
 }
 ```
 

@@ -7,6 +7,7 @@ Operate Mautic from OpenClaw with typed, policy-gated tools for API work, webhoo
 | ClawHub package | `@completetech/openclaw-mautic-plugin` |
 | Runtime ID | `mautic-control` |
 | OpenClaw compatibility | `>=2026.5.22` |
+| ClawHub artifact | ClawPack npm-pack `.tgz` |
 | Tested Mautic version | Mautic Community `7.1.1` |
 | Mautic series | Built for current Mautic 7.x REST API deployments |
 | Source | https://github.com/CompleteTech-LLC-AI-Research/openclaw-mautic-plugin |
@@ -176,6 +177,8 @@ docker compose exec -T openclaw sh -lc 'openclaw security audit --deep --json'
 ## Publish
 
 The package is published on ClawHub as `@completetech/openclaw-mautic-plugin`.
+
+Releases are published as a ClawPack npm-pack artifact, not the older legacy zip artifact.
 
 For a future release:
 

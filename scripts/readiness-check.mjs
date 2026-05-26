@@ -49,7 +49,18 @@ const visibility = run("gh", ["repo", "view", sourceRepo, "--json", "visibility"
 const repoVisibility = visibility.status === 0 ? visibility.stdout.trim().toUpperCase() : "UNKNOWN";
 record("GitHub source repo is visible to public ClawHub review", repoVisibility === "PUBLIC", `visibility=${repoVisibility}`);
 
-const directDryRun = run("npm", ["exec", "--yes", "clawhub", "--", "package", "publish", sourceRepo, "--dry-run"]);
+const directDryRun = run("npm", [
+  "exec",
+  "--yes",
+  "clawhub",
+  "--",
+  "package",
+  "publish",
+  sourceRepo,
+  "--family",
+  "code-plugin",
+  "--dry-run",
+]);
 record("direct GitHub-source ClawHub dry-run passes", directDryRun.status === 0, output(directDryRun));
 
 const failed = checks.filter((check) => !check.ok);

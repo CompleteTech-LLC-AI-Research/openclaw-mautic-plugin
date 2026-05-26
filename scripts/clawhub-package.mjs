@@ -72,6 +72,8 @@ const command = [
   "package",
   "publish",
   ".",
+  "--family",
+  "code-plugin",
   "--source-repo",
   sourceRepo,
   "--source-commit",
