@@ -31,6 +31,63 @@ jobs:
       - name: Dry-run ClawHub package
         run: npm run clawhub:dry-run
 
+      - name: Validate trusted publisher OIDC
+        run: |
+          node --input-type=module <<'NODE'
+          const pkg = await import("./package.json", { with: { type: "json" } });
+          const requestUrl = process.env.ACTIONS_ID_TOKEN_REQUEST_URL;
+          const requestToken = process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if (!requestUrl || !requestToken) {
+            throw new Error("GitHub Actions OIDC environment is not available.");
+          }
+
+          const oidcUrl = new URL(requestUrl);
+          oidcUrl.searchParams.set("audience", "clawhub");
+          const oidcResponse = await fetch(oidcUrl, {
+            headers: { Authorization: `Bearer ${requestToken}` },
+          });
+          const oidcBody = await oidcResponse.json();
+          if (!oidcResponse.ok || !oidcBody.value) {
+            throw new Error(`GitHub OIDC request failed: ${oidcResponse.status}`);
+          }
+
+          const token = oidcBody.value;
+          const [, payload] = token.split(".");
+          const claims = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+          console.log("OIDC claims:", JSON.stringify({
+            aud: claims.aud,
+            repository: claims.repository,
+            repository_id: claims.repository_id,
+            repository_owner: claims.repository_owner,
+            repository_owner_id: claims.repository_owner_id,
+            workflow: claims.workflow,
+            workflow_ref: claims.workflow_ref,
+            job_workflow_ref: claims.job_workflow_ref,
+            ref: claims.ref,
+            sha: claims.sha,
+          }, null, 2));
+
+          const mintResponse = await fetch("https://clawhub.ai/api/v1/publish/token/mint", {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              packageName: pkg.default.name,
+              version: pkg.default.version,
+              githubOidcToken: token,
+            }),
+          });
+          const mintText = await mintResponse.text();
+          console.log(`ClawHub mint status: ${mintResponse.status}`);
+          if (!mintResponse.ok) {
+            console.log(mintText);
+            process.exit(1);
+          }
+          console.log("ClawHub trusted publisher token mint succeeded.");
+          NODE
+
       - name: Publish ClawHub package
         env:
           GH_TOKEN: ${{ github.token }}
