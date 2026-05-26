@@ -60,9 +60,7 @@ Result: passed. ClawHub detected:
   "name": "@completetech/openclaw-mautic-plugin",
   "displayName": "Mautic Control",
   "family": "bundle-plugin",
-  "version": "0.1.0",
-  "files": 17,
-  "totalBytes": 333823
+  "version": "0.1.0"
 }
 ```
 
