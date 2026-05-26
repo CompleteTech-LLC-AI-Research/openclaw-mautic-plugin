@@ -17,12 +17,13 @@ Run the workflow manually from GitHub Actions:
 gh workflow run clawhub-publish.yml --ref main
 ```
 
-The workflow:
+The caller workflow:
 
 - checks out the repository
 - sets up Node.js 24
 - runs lint, tests, and package validation
 - runs a ClawHub dry run
+- delegates the final publish job to ClawHub's official reusable workflow
 - publishes through ClawHub using GitHub Actions OIDC
 
 No long-lived ClawHub token is stored in the repository or GitHub Actions secrets.
