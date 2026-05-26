@@ -48,6 +48,7 @@ if (status && !allowDirty) {
 const commit = requireSuccess(run("git", ["rev-parse", "HEAD"]), "git rev-parse");
 const sourceRepo = process.env.CLAWHUB_SOURCE_REPO || sourceRepoFromPackage();
 const sourceRef = process.env.CLAWHUB_SOURCE_REF || "main";
+const tags = process.env.CLAWHUB_TAGS || "latest,mautic,marketing-automation,crm,webhooks,openclaw";
 const owner = process.env.CLAWHUB_OWNER;
 const changelog = process.env.CLAWHUB_CHANGELOG;
 const clawscanNote = process.env.CLAWHUB_CLAWSCAN_NOTE
@@ -77,6 +78,8 @@ const command = [
   commit,
   "--source-ref",
   sourceRef,
+  "--tags",
+  tags,
   "--clawscan-note",
   clawscanNote,
 ];

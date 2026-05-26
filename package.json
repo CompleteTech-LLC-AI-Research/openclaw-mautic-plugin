@@ -16,9 +16,14 @@
   },
   "keywords": [
     "openclaw",
+    "openclaw-plugin",
     "clawhub",
     "mautic",
+    "mautic-api",
     "marketing-automation",
+    "marketing-operations",
+    "crm",
+    "webhooks",
     "plugin"
   ],
   "files": [
