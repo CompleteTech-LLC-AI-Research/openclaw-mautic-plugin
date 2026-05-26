@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.12 - 2026-05-26
+
+- Enforced transport safety for authenticated Mautic API requests: routable plain-HTTP `baseUrl` values now fail before credentials are sent.
+
 ## 0.1.11 - 2026-05-26
 
 - Added explicit Basic auth transport warnings for plain HTTP Mautic API connections.

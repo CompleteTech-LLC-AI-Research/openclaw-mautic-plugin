@@ -42,7 +42,7 @@ Mitigations:
 
 The Mautic API tools use the configured `baseUrl` and send Basic auth credentials in the HTTP `Authorization` header. Plain HTTP is intended only for trusted local Docker networks, loopback automation, or another private network segment where OpenClaw and Mautic are isolated from untrusted traffic.
 
-For production, hosted, routed, or cross-host deployments, set `baseUrl` to an HTTPS endpoint. Do not send production Mautic credentials through plain HTTP over a public, shared, wireless, or otherwise untrusted network.
+For production, hosted, routed, or cross-host deployments, set `baseUrl` to an HTTPS endpoint. Authenticated API tools refuse to send credentials to a routable plain-HTTP host, but operators should still avoid plain HTTP except on trusted loopback or private container networks.
 
 ## Console Bridge
 

@@ -76,7 +76,7 @@ OAuth2 is preferred for external production integrations where available. The lo
 
 `mautic_request`, `mautic_entity`, `mautic_webhook_triggers`, and `mautic_status` send Mautic API credentials with each request. If `baseUrl` uses plain HTTP, those credentials can be intercepted anywhere between OpenClaw and Mautic.
 
-Use `https://` for production, hosted, routed, or cross-host Mautic deployments. Use plain `http://` only for a trusted loopback address or private container network such as `http://mautic_web`. The `mautic_status` tool reports a transport warning when the configured `baseUrl` is not HTTPS.
+Use `https://` for production, hosted, routed, or cross-host Mautic deployments. Use plain `http://` only for a trusted loopback address or private container network such as `http://mautic_web`. The `mautic_status` tool reports a transport warning when the configured `baseUrl` is not HTTPS, and authenticated API tools refuse to send credentials to a routable plain-HTTP host.
 
 ## Plugin Settings
 

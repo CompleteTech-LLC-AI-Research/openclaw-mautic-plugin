@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   assertMauticApiPath,
   assertPathWithinRoot,
+  assertSafeMauticTransport,
   getRuntimeConfig,
   legacyEntityRequest,
   requireId,
@@ -79,6 +80,15 @@ test("transport warning distinguishes HTTPS, private HTTP, and routable HTTP", (
   assert.equal(transportSecurityWarning("https://mautic.example.com"), null);
   assert.equal(transportSecurityWarning("http://mautic_web").level, "warning");
   assert.equal(transportSecurityWarning("http://mautic.example.com").level, "critical");
+});
+
+test("authenticated requests refuse unsafe routable HTTP transport", () => {
+  assert.doesNotThrow(() => assertSafeMauticTransport({ baseUrl: "https://mautic.example.com" }));
+  assert.doesNotThrow(() => assertSafeMauticTransport({ baseUrl: "http://mautic_web" }));
+  assert.throws(
+    () => assertSafeMauticTransport({ baseUrl: "http://mautic.example.com" }),
+    /Refusing to send Mautic API credentials/,
+  );
 });
 
 test("automation commands are separately opt-in", () => {
