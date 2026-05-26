@@ -1,8 +1,42 @@
 {
-  "name": "openclaw-mautic-plugin",
+  "name": "@completetech/openclaw-mautic-plugin",
   "version": "0.1.0",
+  "description": "OpenClaw plugin for controlled Mautic API, webhook, console bridge, and workspace operations.",
   "type": "module",
-  "private": true,
+  "private": false,
+  "license": "MIT",
+  "author": "CompleteTech LLC AI Research",
+  "homepage": "https://github.com/CompleteTech-LLC-AI-Research/openclaw-mautic-plugin#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CompleteTech-LLC-AI-Research/openclaw-mautic-plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CompleteTech-LLC-AI-Research/openclaw-mautic-plugin/issues"
+  },
+  "keywords": [
+    "openclaw",
+    "clawhub",
+    "mautic",
+    "marketing-automation",
+    "plugin"
+  ],
+  "files": [
+    "index.js",
+    "lib/",
+    "openclaw.plugin.json",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md",
+    "CHANGELOG.md",
+    "docs/",
+    "mautic/",
+    "skills/"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "package:check": "npm pack --dry-run"
+  },
   "openclaw": {
     "extensions": ["./index.js"],
     "compat": {

@@ -1,7 +1,7 @@
 {
   "id": "mautic-control",
   "name": "Mautic Control",
-  "description": "Typed tools for controlling the local Mautic stack through its REST APIs and safe maintenance bridge.",
+  "description": "Typed tools for controlled Mautic REST API access, webhook inspection, optional console maintenance, and optional workspace file staging.",
   "version": "0.1.0",
   "contracts": {
     "tools": [
@@ -63,13 +63,23 @@
       },
       "allowMaintenanceCommands": {
         "type": "boolean",
-        "default": true,
+        "default": false,
         "description": "Allow safe maintenance commands: cache:clear, mautic:cache:clear, and plugins:reload. migrations:status is always allowed."
       },
       "allowAutomationJobCommands": {
         "type": "boolean",
         "default": false,
         "description": "Allow safe background job commands: webhooks:process, campaigns:rebuild, campaigns:trigger, and segments:update."
+      },
+      "allowWorkspaceRead": {
+        "type": "boolean",
+        "default": false,
+        "description": "Allow listing and reading files under workspaceRoot. Keep disabled unless the OpenClaw operator is trusted to inspect staged Mautic files."
+      },
+      "allowWorkspaceWrite": {
+        "type": "boolean",
+        "default": false,
+        "description": "Allow writing and deleting files under workspaceRoot. Keep disabled unless the OpenClaw operator is trusted to modify staged Mautic files."
       }
     }
   }
