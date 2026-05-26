@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 - 2026-05-26
+
+- Updated ClawHub release tags for better package discovery.
+- Added matching package keywords and GitHub repository topics.
+- Cleaned up the production README included in the published package.
+
 ## 0.1.0 - 2026-05-26
 
 - Prepared the Mautic Control plugin for ClawHub readiness review.
