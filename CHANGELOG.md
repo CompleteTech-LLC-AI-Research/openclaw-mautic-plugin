@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 - 2026-05-26
+
+- Improved the README security section for clearer ClawHub rendering and operator guidance.
+
 ## 0.1.1 - 2026-05-26
 
 - Updated ClawHub release tags for better package discovery.

@@ -59,31 +59,25 @@ Environment fallbacks are also supported: `MAUTIC_BASE_URL`, `MAUTIC_CONSOLE_URL
 
 ## Security Model
 
-Production defaults are restrictive:
+The plugin ships with conservative production defaults. Installing it does not automatically grant file access or operational Mautic job control.
 
-- Maintenance commands are disabled.
-- Automation job commands are disabled.
-- Workspace read/write access is disabled.
-- API requests are restricted to `/api` and `/api/v2`.
-- Workspace file paths must remain inside `allowedWorkspaceRoot`.
-- Console commands are intersected with a hardcoded allowlist before execution.
+| Area | Default | Guardrail |
+| --- | --- | --- |
+| Mautic API | Enabled after credentials are provided | Requests are limited to `/api` and `/api/v2`. |
+| Console status | Enabled only for `migrations:status` | Useful for health checks without granting maintenance control. |
+| Maintenance commands | Disabled | Requires `allowMaintenanceCommands=true`. |
+| Automation jobs | Disabled | Requires `allowAutomationJobCommands=true`. |
+| Workspace files | Disabled | Read and write require separate opt-in toggles. |
+| Path access | Guarded | File paths must stay inside `allowedWorkspaceRoot`. |
 
-The only console command available without extra capability toggles is `migrations:status`.
+Enable capabilities only for operators and agents you trust with that scope.
 
-`allowMaintenanceCommands` enables:
+| Toggle | Commands Enabled | When To Use |
+| --- | --- | --- |
+| `allowMaintenanceCommands` | `cache:clear`, `mautic:cache:clear`, `plugins:reload` | Routine maintenance after plugin/config/cache changes. |
+| `allowAutomationJobCommands` | `webhooks:process`, `campaigns:rebuild`, `campaigns:trigger`, `segments:update` | Intentional campaign, segment, and webhook job execution. |
 
-- `cache:clear`
-- `mautic:cache:clear`
-- `plugins:reload`
-
-`allowAutomationJobCommands` enables:
-
-- `webhooks:process`
-- `campaigns:rebuild`
-- `campaigns:trigger`
-- `segments:update`
-
-Use restrictive OpenClaw profiles or explicit tool allowlists for agents that process untrusted input.
+Console requests are checked twice: first by the plugin's hardcoded allowlist, then by the optional bridge's allowlist. For agents that process untrusted input, use restrictive OpenClaw profiles or explicit tool allowlists.
 
 ## Console Bridge
 
