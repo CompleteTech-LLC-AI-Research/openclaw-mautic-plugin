@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3 - 2026-05-26
+
+- Improved the ClawHub README page with clearer compatibility, production setup, and operator safety sections.
+- Documented verification against Mautic Community 7.1.1, the latest GitHub release checked on 2026-05-26.
+
 ## 0.1.2 - 2026-05-26
 
 - Improved the README security section for clearer ClawHub rendering and operator guidance.
