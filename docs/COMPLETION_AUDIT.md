@@ -40,6 +40,7 @@ Do not mark public ClawHub deployment complete until one of these is true:
 | Live smoke test script | `scripts/live-smoke.mjs`, run by `npm run live:smoke` | Complete |
 | CI workflow | `.github/workflows/ci.yml` runs lint, tests, and package validation | Complete |
 | ClawHub dry-run | `npm run clawhub:dry-run` passes from local folder with source metadata | Complete |
+| Accidental publish guard | `npm run clawhub:publish` refuses private source unless `CLAWHUB_ALLOW_PRIVATE_SOURCE=1` is set after private-source review approval | Complete |
 | Direct GitHub-source ClawHub dry-run | `clawhub package publish CompleteTech-LLC-AI-Research/openclaw-mautic-plugin --dry-run` fails because repo is private | Blocked |
 | Repo clean and pushed | `git status --short --branch` reports `main...origin/main` after latest push | Complete |
 

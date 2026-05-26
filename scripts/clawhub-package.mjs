@@ -6,6 +6,7 @@ const args = new Set(process.argv.slice(2));
 const publish = args.has("--publish");
 const allowDirty = args.has("--allow-dirty");
 const json = !args.has("--no-json");
+const allowPrivateSource = process.env.CLAWHUB_ALLOW_PRIVATE_SOURCE === "1";
 
 function run(command, commandArgs, options = {}) {
   return spawnSync(command, commandArgs, {
@@ -33,6 +34,12 @@ function sourceRepoFromPackage() {
   return match[1].replace(/^git\+/, "");
 }
 
+function repoVisibility(sourceRepo) {
+  const result = run("gh", ["repo", "view", sourceRepo, "--json", "visibility", "--jq", ".visibility"]);
+  if (result.status !== 0) return "UNKNOWN";
+  return result.stdout.trim().toUpperCase();
+}
+
 const status = requireSuccess(run("git", ["status", "--porcelain"]), "git status");
 if (status && !allowDirty) {
   throw new Error("Working tree is dirty. Commit changes first or pass --allow-dirty for a local dry-run only.");
@@ -45,6 +52,16 @@ const owner = process.env.CLAWHUB_OWNER;
 const changelog = process.env.CLAWHUB_CHANGELOG;
 const clawscanNote = process.env.CLAWHUB_CLAWSCAN_NOTE
   || "Mautic plugin uses network access for Mautic REST API calls, an optional token-protected private console bridge, and opt-in workspace staging under a guarded root. Production defaults disable maintenance, automation, and workspace file access.";
+
+if (publish) {
+  const visibility = repoVisibility(sourceRepo);
+  if (visibility !== "PUBLIC" && !allowPrivateSource) {
+    throw new Error(
+      `Refusing to publish because source repo ${sourceRepo} visibility is ${visibility}. `
+      + "Make the repo public or set CLAWHUB_ALLOW_PRIVATE_SOURCE=1 only after ClawHub has approved a private-source review path.",
+    );
+  }
+}
 
 const command = [
   "exec",

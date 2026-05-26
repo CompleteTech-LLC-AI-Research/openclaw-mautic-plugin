@@ -135,7 +135,9 @@ To publish after source visibility/review access is resolved and ClawHub login i
 npm run clawhub:publish
 ```
 
-Optional environment variables for publishing are `CLAWHUB_OWNER`, `CLAWHUB_CHANGELOG`, `CLAWHUB_SOURCE_REPO`, `CLAWHUB_SOURCE_REF`, and `CLAWHUB_CLAWSCAN_NOTE`.
+The publish wrapper refuses to publish while the source repository is private. Set `CLAWHUB_ALLOW_PRIVATE_SOURCE=1` only if ClawHub has approved a private-source review path for this package.
+
+Optional environment variables for publishing are `CLAWHUB_OWNER`, `CLAWHUB_CHANGELOG`, `CLAWHUB_SOURCE_REPO`, `CLAWHUB_SOURCE_REF`, `CLAWHUB_CLAWSCAN_NOTE`, and `CLAWHUB_ALLOW_PRIVATE_SOURCE`.
 
 ## Known Limits
 
