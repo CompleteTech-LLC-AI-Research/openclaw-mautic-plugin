@@ -57,8 +57,6 @@ const directDryRun = run("npm", [
   "package",
   "publish",
   sourceRepo,
-  "--family",
-  "code-plugin",
   "--dry-run",
 ]);
 record("direct GitHub-source ClawHub dry-run passes", directDryRun.status === 0, output(directDryRun));

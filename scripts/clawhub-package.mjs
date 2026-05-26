@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { spawnSync } from "node:child_process";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const args = new Set(process.argv.slice(2));
 const publish = args.has("--publish");
@@ -64,6 +67,31 @@ if (publish) {
   }
 }
 
+const packDir = mkdtempSync(join(tmpdir(), "mautic-control-clawpack-"));
+const packResult = run("npm", [
+  "exec",
+  "--yes",
+  "clawhub",
+  "--",
+  "package",
+  "pack",
+  ".",
+  "--pack-destination",
+  packDir,
+  "--json",
+]);
+
+let packed;
+try {
+  packed = JSON.parse(requireSuccess(packResult, "clawhub package pack"));
+} catch (error) {
+  rmSync(packDir, { recursive: true, force: true });
+  if (error instanceof SyntaxError) {
+    throw new Error(`clawhub package pack returned invalid JSON:\n${packResult.stdout || ""}${packResult.stderr || ""}`);
+  }
+  throw error;
+}
+
 const command = [
   "exec",
   "--yes",
@@ -71,9 +99,7 @@ const command = [
   "--",
   "package",
   "publish",
-  ".",
-  "--family",
-  "code-plugin",
+  packed.path,
   "--source-repo",
   sourceRepo,
   "--source-commit",
@@ -92,4 +118,5 @@ if (owner) command.push("--owner", owner);
 if (changelog) command.push("--changelog", changelog);
 
 const result = run("npm", command, { stdio: "inherit" });
+rmSync(packDir, { recursive: true, force: true });
 process.exit(result.status ?? 1);
