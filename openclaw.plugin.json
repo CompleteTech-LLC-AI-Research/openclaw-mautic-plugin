@@ -2,7 +2,7 @@
   "id": "mautic-control",
   "name": "Mautic Control",
   "description": "Typed tools for controlled Mautic REST API access, webhook inspection, optional console maintenance, and optional workspace file staging.",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "contracts": {
     "tools": [
       "mautic_status",

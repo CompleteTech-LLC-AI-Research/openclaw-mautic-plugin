@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.10 - 2026-05-26
+
+- Removed the legacy `MAUTIC_CONSOLE_COMMAND_POLICY` environment fallback; console policy should come from plugin config or the explicit capability toggles.
+
 ## 0.1.9 - 2026-05-26
 
 - Excluded local release helper scripts from the published ClawPack artifact to reduce ClawHub static-scan noise.

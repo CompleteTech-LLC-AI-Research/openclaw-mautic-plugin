@@ -8,7 +8,7 @@ This package is configured for GitHub Actions OIDC trusted publishing.
 - Repository: `CompleteTech-LLC-AI-Research/openclaw-mautic-plugin`
 - Workflow file: `clawhub-publish.yml`
 - Artifact format: ClawPack `npm-pack` `.tgz`
-- Workflow artifact: `./clawpack/completetech-openclaw-mautic-plugin-0.1.9.tgz`
+- Workflow artifact: `./clawpack/completetech-openclaw-mautic-plugin-0.1.10.tgz`
 
 ## Workflow
 
