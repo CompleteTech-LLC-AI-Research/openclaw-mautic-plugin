@@ -49,11 +49,15 @@ Validate against your exact Mautic instance before broad rollout, especially if 
 
 ## Production Setup
 
-1. Set `baseUrl` to the internal URL OpenClaw should use for Mautic.
-2. Provide `MAUTIC_API_USERNAME` and `MAUTIC_API_PASSWORD` from a secret store or runtime environment.
-3. Keep maintenance, automation, and workspace access disabled unless the operator needs them.
-4. Deploy `mautic/console-bridge.php` only if `mautic_console` is required.
-5. Use restrictive OpenClaw profiles or explicit tool allowlists for agents that process untrusted input.
+Use these production defaults unless a trusted operator needs broader access.
+
+| Step | Action | Guidance |
+| --- | --- | --- |
+| Connect Mautic | Set baseUrl | Use the internal URL OpenClaw should call, not a public browser URL unless required by your deployment. |
+| Add credentials | Provide API username and password | Load them from a secret store or runtime environment, not from plugin UI config. |
+| Keep access narrow | Leave optional controls disabled | Enable maintenance, automation, or workspace access only for trusted operators. |
+| Add console access only if needed | Deploy the console bridge | The bridge is required only for console commands. All other tools can run without it. |
+| Limit agent exposure | Use restrictive OpenClaw profiles | Prefer explicit tool allowlists for agents that process untrusted input. |
 
 ## Required Secrets
 
