@@ -6,7 +6,7 @@ Historical/alternate handoff only. The repository is currently public, so this p
 
 - Package name: `@completetech/openclaw-mautic-plugin`
 - Plugin id: `mautic-control`
-- Version: `0.1.4`
+- Version: `0.1.5`
 - Source repository: `CompleteTech-LLC-AI-Research/openclaw-mautic-plugin`
 - Current source visibility: public
 - Branch: `main`

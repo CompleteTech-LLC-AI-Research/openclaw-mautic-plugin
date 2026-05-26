@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.5 - 2026-05-26
+
+- Improved the README security defaults section for clearer ClawHub rendering.
+- Replaced code-pill-heavy lists with compact operator-focused tables.
+
 ## 0.1.4 - 2026-05-26
 
 - Published through ClawHub's newer ClawPack npm-pack artifact path.

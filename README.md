@@ -101,23 +101,28 @@ MAUTIC_ALLOW_WORKSPACE_WRITE
 
 ## Security Defaults
 
-Installing the plugin does not automatically grant file access or operational Mautic job control.
+The plugin starts in a conservative mode. API access becomes available only after credentials are provided, and operational controls stay off until an operator enables them.
 
-| Area | Default | Guardrail |
+### Default Access
+
+| Capability | Default | What That Means |
 | --- | --- | --- |
-| Mautic API | Available after credentials are provided | Requests are limited to `/api` and `/api/v2`. |
-| Console health check | `migrations:status` only | Allows migration status without maintenance control. |
-| Maintenance commands | Disabled | Requires `allowMaintenanceCommands=true`. |
-| Automation jobs | Disabled | Requires `allowAutomationJobCommands=true`. |
-| Workspace files | Disabled | Read and write are separate opt-ins. |
-| Path access | Guarded | File paths must stay inside `allowedWorkspaceRoot`. |
+| Mautic API | Available after credentials | Requests are limited to Mautic API routes only: /api and /api/v2. |
+| Console status | On | Only migration status is allowed, so OpenClaw can check health without changing Mautic. |
+| Maintenance commands | Off | Cache clearing and plugin reloads require an explicit toggle. |
+| Automation jobs | Off | Campaign, segment, and webhook job execution requires a separate explicit toggle. |
+| Workspace read | Off | File listing and reading are disabled until enabled for a dedicated staging directory. |
+| Workspace write | Off | File writes and deletes are disabled until enabled for a dedicated staging directory. |
+| Filesystem boundary | Always on | Every workspace path must stay inside the configured allowed workspace root. |
 
-| Toggle | Commands Enabled | Intended Use |
+### Optional Command Groups
+
+| Setting | Enables | Intended Use |
 | --- | --- | --- |
-| `allowMaintenanceCommands` | `cache:clear`, `mautic:cache:clear`, `plugins:reload` | Routine maintenance after config, plugin, or cache changes. |
-| `allowAutomationJobCommands` | `webhooks:process`, `campaigns:rebuild`, `campaigns:trigger`, `segments:update` | Intentional campaign, segment, and webhook job execution. |
+| allowMaintenanceCommands | cache:clear; mautic:cache:clear; plugins:reload | Routine maintenance after config, plugin, or cache changes. |
+| allowAutomationJobCommands | webhooks:process; campaigns:rebuild; campaigns:trigger; segments:update | Intentional campaign, segment, and webhook job execution. |
 
-Console requests are checked by the plugin allowlist and again by the optional bridge allowlist.
+Console requests are checked twice: first by the plugin allowlist, then by the optional bridge allowlist. For agents that process untrusted input, use restrictive OpenClaw profiles or explicit tool allowlists.
 
 ## Console Bridge
 
