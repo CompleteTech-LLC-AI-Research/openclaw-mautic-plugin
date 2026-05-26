@@ -1,8 +1,8 @@
 {
   "id": "mautic-control",
   "name": "Mautic Control",
-  "description": "Typed tools for controlled Mautic REST API access, webhook inspection, optional console maintenance, and optional workspace file staging.",
-  "version": "0.1.12",
+  "description": "Controlled Mautic CRM operations for OpenClaw with guarded API, webhook, console, and workspace tools.",
+  "version": "0.1.13",
   "contracts": {
     "tools": [
       "mautic_status",

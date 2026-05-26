@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.13 - 2026-05-26
+
+- Polished the ClawHub-facing README with a clearer product overview, quick-start path, capability summary, and streamlined safety sections.
+- Kept the same conservative runtime behavior: no broad console access, no workspace access unless explicitly enabled, and HTTPS enforcement for routable authenticated API calls.
+
 ## 0.1.12 - 2026-05-26
 
 - Enforced transport safety for authenticated Mautic API requests: routable plain-HTTP `baseUrl` values now fail before credentials are sent.
