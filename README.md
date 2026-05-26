@@ -1,72 +1,99 @@
-# OpenClaw Mautic Plugin
+# Mautic Control for OpenClaw
 
-`mautic-control` is an OpenClaw plugin for operating a Mautic instance through typed, policy-gated tools. It supports REST API CRUD, webhook trigger discovery, optional console maintenance, and optional workspace file staging.
+OpenClaw plugin for controlled Mautic administration through policy-gated tools.
 
-The included Docker stack defaults are for local development. General ClawHub deployments must provide their own Mautic URL, credentials, and optional console bridge.
+- Package: `@completetech/openclaw-mautic-plugin`
+- Runtime ID: `mautic-control`
+- ClawHub: https://clawhub.ai/plugins/%40completetech/openclaw-mautic-plugin
+- Source: https://github.com/CompleteTech-LLC-AI-Research/openclaw-mautic-plugin
 
-## Tools
+## Install
 
-- `mautic_status` checks dashboard reachability, API authentication, resolved config, command policy, and workspace policy.
-- `mautic_request` sends an authenticated request to a path under `/api` or `/api/v2`.
-- `mautic_entity` provides list/get/create/update/delete for supported Mautic resources.
-- `mautic_webhook_triggers` lists valid Mautic webhook trigger events.
-- `mautic_console` runs an allowlisted command through the optional internal console bridge.
-- `mautic_workspace_file` lists, reads, writes, or deletes files under the configured workspace root when explicitly enabled.
+```bash
+openclaw plugins install clawhub:@completetech/openclaw-mautic-plugin
+```
 
-## Plugin Configuration
+After installation, configure the plugin in OpenClaw's plugin settings and provide Mautic credentials through environment variables or your platform secret store.
 
-OpenClaw shows these non-secret fields in the plugin settings UI under `mautic-control`:
+## What It Provides
 
-- `baseUrl`, default `http://mautic_web`
-- `consoleUrl`, default `http://mautic_console:8099/console`
-- `workspaceRoot`, default `/workspace/mautic`
-- `allowedWorkspaceRoot`, default `/workspace/mautic`
-- `defaultApiVersion`, `legacy` or `v2`, default `legacy`
-- `requestTimeoutSeconds`, 5 to 600 seconds, default `60`
-- `allowMaintenanceCommands`, default `false`
-- `allowAutomationJobCommands`, default `false`
-- `allowWorkspaceRead`, default `false`
-- `allowWorkspaceWrite`, default `false`
+| Tool | Purpose |
+| --- | --- |
+| `mautic_status` | Checks dashboard reachability, API auth, resolved config, command policy, and workspace policy. |
+| `mautic_request` | Sends authenticated requests to Mautic paths under `/api` or `/api/v2`. |
+| `mautic_entity` | Provides list/get/create/update/delete operations for supported Mautic resources. |
+| `mautic_webhook_triggers` | Lists valid Mautic webhook trigger events. |
+| `mautic_console` | Runs allowlisted Mautic console commands through the optional private bridge. |
+| `mautic_workspace_file` | Lists, reads, writes, or deletes files under a guarded workspace root when explicitly enabled. |
 
-The runtime resolves plugin UI config first, environment variables second, and built-in defaults last.
+## Required Secrets
 
-Console command access uses a status-only baseline plus two capability toggles:
+Do not store secrets in plugin UI config, README files, or source control.
 
-- `migrations:status` is always allowed so OpenClaw can check Mautic migration state.
-- `allowMaintenanceCommands` enables `cache:clear`, `mautic:cache:clear`, and `plugins:reload`.
-- `allowAutomationJobCommands` enables `webhooks:process`, `campaigns:rebuild`, `campaigns:trigger`, and `segments:update`.
+| Secret | Purpose |
+| --- | --- |
+| `MAUTIC_API_USERNAME` | Mautic API username. Use least-privilege credentials. |
+| `MAUTIC_API_PASSWORD` | Mautic API password. |
+| `MAUTIC_CONSOLE_TOKEN` | Shared token for the optional console bridge. Required only for `mautic_console`. |
 
-Legacy `consoleCommandPolicy` and `consoleCommandGroups` values are still accepted if an older deployment already has them, but they are not shown in the default settings UI. Every resolved policy is intersected with the plugin's hardcoded safe allowlist before `mautic_console` runs anything.
+OAuth2 is preferred for external production integrations where available. The local verification stack uses Basic auth for loopback-only automation.
 
-## Secrets
+## Plugin Settings
 
-Secrets stay out of plugin UI config. Provide credentials through the OpenClaw runtime environment or a platform secret store:
+These are non-secret settings shown in OpenClaw.
 
-- `MAUTIC_API_USERNAME`
-- `MAUTIC_API_PASSWORD`
-- `MAUTIC_CONSOLE_TOKEN`
+| Setting | Default | Production Guidance |
+| --- | --- | --- |
+| `baseUrl` | `http://mautic_web` | Set to the internal URL OpenClaw should use for Mautic. |
+| `consoleUrl` | `http://mautic_console:8099/console` | Set only if deploying the private console bridge. |
+| `workspaceRoot` | `/workspace/mautic` | Dedicated staging directory for file operations. |
+| `allowedWorkspaceRoot` | `/workspace/mautic` | Must contain `workspaceRoot`; do not point at a home directory or secrets path. |
+| `defaultApiVersion` | `legacy` | Use `legacy` or `v2`, depending on your Mautic API routes. |
+| `requestTimeoutSeconds` | `60` | Range: 5 to 600 seconds. |
+| `allowMaintenanceCommands` | `false` | Enable only for trusted operators. |
+| `allowAutomationJobCommands` | `false` | Enable only when campaign/webhook job execution is intended. |
+| `allowWorkspaceRead` | `false` | Enable only for a dedicated staging directory. |
+| `allowWorkspaceWrite` | `false` | Enable only for a dedicated staging directory. |
 
-Optional environment fallbacks for non-secret settings are `MAUTIC_BASE_URL`, `MAUTIC_CONSOLE_URL`, `MAUTIC_WORKSPACE_DIR`, `MAUTIC_ALLOWED_WORKSPACE_ROOT`, `MAUTIC_DEFAULT_API_VERSION`, `MAUTIC_REQUEST_TIMEOUT_SECONDS`, `MAUTIC_ALLOW_MAINTENANCE_COMMANDS`, `MAUTIC_ALLOW_AUTOMATION_JOB_COMMANDS`, `MAUTIC_ALLOW_WORKSPACE_READ`, and `MAUTIC_ALLOW_WORKSPACE_WRITE`. `MAUTIC_CONSOLE_COMMAND_POLICY` remains as a legacy fallback only.
+Environment fallbacks are also supported: `MAUTIC_BASE_URL`, `MAUTIC_CONSOLE_URL`, `MAUTIC_WORKSPACE_DIR`, `MAUTIC_ALLOWED_WORKSPACE_ROOT`, `MAUTIC_DEFAULT_API_VERSION`, `MAUTIC_REQUEST_TIMEOUT_SECONDS`, `MAUTIC_ALLOW_MAINTENANCE_COMMANDS`, `MAUTIC_ALLOW_AUTOMATION_JOB_COMMANDS`, `MAUTIC_ALLOW_WORKSPACE_READ`, and `MAUTIC_ALLOW_WORKSPACE_WRITE`.
 
-Use least-privilege Mautic credentials for production. OAuth2 is preferred for external Mautic integrations, but the local verification stack uses Basic auth for loopback-only automation.
+## Security Model
+
+Production defaults are restrictive:
+
+- Maintenance commands are disabled.
+- Automation job commands are disabled.
+- Workspace read/write access is disabled.
+- API requests are restricted to `/api` and `/api/v2`.
+- Workspace file paths must remain inside `allowedWorkspaceRoot`.
+- Console commands are intersected with a hardcoded allowlist before execution.
+
+The only console command available without extra capability toggles is `migrations:status`.
+
+`allowMaintenanceCommands` enables:
+
+- `cache:clear`
+- `mautic:cache:clear`
+- `plugins:reload`
+
+`allowAutomationJobCommands` enables:
+
+- `webhooks:process`
+- `campaigns:rebuild`
+- `campaigns:trigger`
+- `segments:update`
+
+Use restrictive OpenClaw profiles or explicit tool allowlists for agents that process untrusted input.
 
 ## Console Bridge
 
-`mautic_console` requires `mautic/console-bridge.php`. All other tools can work without the bridge.
+`mautic_console` requires `mautic/console-bridge.php`. All other tools can work without it.
 
-Deploy the bridge only on a private network where OpenClaw can reach it. Set a strong `MAUTIC_CONSOLE_TOKEN`; the plugin sends it as `X-Mautic-Console-Token`. Do not expose the bridge directly to the public internet.
-
-The bridge itself also has a hardcoded command allowlist. The plugin applies its own allowlist before making the bridge request, so both sides must allow a command.
-
-## Workspace File Access
-
-`mautic_workspace_file` is disabled by default for production. Enable `allowWorkspaceRead` for list/read operations and `allowWorkspaceWrite` for write/delete operations. Both `workspaceRoot` and each requested path must remain under `allowedWorkspaceRoot`.
-
-Use a dedicated staging directory. Do not point `allowedWorkspaceRoot` at a full application checkout, home directory, or directory containing secrets.
+Deploy the bridge only on a private network reachable by OpenClaw and never expose it directly to the public internet. The plugin sends `MAUTIC_CONSOLE_TOKEN` as `X-Mautic-Console-Token`; the bridge also applies its own command allowlist.
 
 ## Local Docker Stack
 
-The companion stack uses explicit config to preserve the local workflow:
+The companion Docker stack uses explicit local config:
 
 ```text
 baseUrl=http://mautic_web
@@ -81,33 +108,11 @@ allowWorkspaceRead=true
 allowWorkspaceWrite=true
 ```
 
-The stack binds Mautic and OpenClaw to loopback host ports. Do not expose local development passwords or loopback-only Basic auth settings publicly.
+Those values preserve the local development workflow. Do not expose the local stack's loopback-only credentials or Basic auth settings publicly.
 
-## Usage Examples
+## Verify
 
-```bash
-openclaw gateway call tools.invoke --json --params '{"name":"mautic_status","args":{}}'
-```
-
-```bash
-openclaw gateway call tools.invoke --json --params '{"name":"mautic_request","args":{"path":"/api/contacts","query":{"limit":1}}}'
-```
-
-```json
-{ "tool": "mautic_entity", "args": { "entity": "contacts", "action": "list", "query": { "limit": 5 } } }
-```
-
-```json
-{ "tool": "mautic_console", "args": { "command": "migrations:status" } }
-```
-
-```json
-{ "tool": "mautic_workspace_file", "args": { "action": "write", "path": "notes/example.txt", "content": "staged from OpenClaw" } }
-```
-
-## Verification
-
-Run local package checks:
+Package checks:
 
 ```bash
 npm run lint
@@ -115,35 +120,37 @@ npm test
 npm run package:check
 ```
 
-Run live checks from the companion stack after it is running:
+ClawHub readiness:
 
 ```bash
-node scripts/audit.mjs
-npm run live:smoke
-docker compose exec -T openclaw sh -lc 'openclaw security audit --deep --json'
-```
-
-Before publishing to ClawHub, run the package dry-run wrapper and address all critical findings:
-
-```bash
-npm run clawhub:dry-run
 npm run readiness:check
 ```
 
-To publish after source visibility/review access is resolved and ClawHub login is configured:
+Live stack checks:
 
 ```bash
+npm run live:smoke
+node scripts/audit.mjs
+node scripts/audit.mjs --live
+docker compose exec -T openclaw sh -lc 'openclaw security audit --deep --json'
+```
+
+## Publish
+
+The package is already published on ClawHub as `@completetech/openclaw-mautic-plugin`.
+
+For a future release:
+
+```bash
+npm run readiness:check
 npm run clawhub:publish
 ```
 
-The publish wrapper refuses to publish while the source repository is private. Set `CLAWHUB_ALLOW_PRIVATE_SOURCE=1` only if ClawHub has approved a private-source review path for this package.
-
-Optional environment variables for publishing are `CLAWHUB_OWNER`, `CLAWHUB_CHANGELOG`, `CLAWHUB_SOURCE_REPO`, `CLAWHUB_SOURCE_REF`, `CLAWHUB_CLAWSCAN_NOTE`, and `CLAWHUB_ALLOW_PRIVATE_SOURCE`.
+Optional publish environment variables are `CLAWHUB_OWNER`, `CLAWHUB_CHANGELOG`, `CLAWHUB_SOURCE_REPO`, `CLAWHUB_SOURCE_REF`, `CLAWHUB_CLAWSCAN_NOTE`, and `CLAWHUB_ALLOW_PRIVATE_SOURCE`.
 
 ## Known Limits
 
-- The plugin is a pre-1.0 release and should be reviewed in the target environment before broad rollout.
-- `mautic_request` is restricted to `/api` and `/api/v2` paths.
+- This is a pre-1.0 release; validate it in the target environment before broad rollout.
 - `mautic_console` cannot run arbitrary shell or Mautic console commands.
-- `mautic_workspace_file` is restricted to `workspaceRoot` and `allowedWorkspaceRoot`, and requires explicit read/write toggles.
-- Public ClawHub distribution requires the source repository to be public or otherwise accessible to ClawHub review.
+- `mautic_workspace_file` is for guarded staging workflows, not full filesystem access.
+- ClawHub scan status may be pending immediately after a new release is published.
