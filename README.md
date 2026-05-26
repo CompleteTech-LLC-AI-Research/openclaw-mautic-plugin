@@ -55,6 +55,7 @@ Use these production defaults unless a trusted operator needs broader access.
 | --- | --- | --- |
 | Connect Mautic | Set baseUrl | Use the internal URL OpenClaw should call, not a public browser URL unless required by your deployment. |
 | Add credentials | Provide API username and password | Load them from a secret store or runtime environment, not from plugin UI config. |
+| Protect transport | Use HTTPS outside private networks | Basic auth credentials are sent on every Mautic API request. Plain HTTP is acceptable only on a trusted local or private Docker network. |
 | Keep access narrow | Leave optional controls disabled | Enable maintenance, automation, or workspace access only for trusted operators. |
 | Add console access only if needed | Deploy the console bridge | The bridge is required only for console commands. All other tools can run without it. |
 | Limit agent exposure | Use restrictive OpenClaw profiles | Prefer explicit tool allowlists for agents that process untrusted input. |
@@ -70,6 +71,12 @@ Never store these values in the plugin UI, README, or source control.
 | `MAUTIC_CONSOLE_TOKEN` | Shared token for the optional console bridge. Required only for `mautic_console`. |
 
 OAuth2 is preferred for external production integrations where available. The local verification stack uses Basic auth only for loopback automation.
+
+## Transport Warning
+
+`mautic_request`, `mautic_entity`, `mautic_webhook_triggers`, and `mautic_status` send Mautic API credentials with each request. If `baseUrl` uses plain HTTP, those credentials can be intercepted anywhere between OpenClaw and Mautic.
+
+Use `https://` for production, hosted, routed, or cross-host Mautic deployments. Use plain `http://` only for a trusted loopback address or private container network such as `http://mautic_web`. The `mautic_status` tool reports a transport warning when the configured `baseUrl` is not HTTPS.
 
 ## Plugin Settings
 

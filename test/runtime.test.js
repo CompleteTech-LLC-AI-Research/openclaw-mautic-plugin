@@ -8,6 +8,7 @@ import {
   requireId,
   resolveConsoleCommands,
   safeWorkspacePath,
+  transportSecurityWarning,
   v2EntityRequest,
 } from "../lib/runtime.js";
 
@@ -61,6 +62,7 @@ test("local stack config can explicitly opt into maintenance and workspace stagi
       },
     });
     assert.equal(config.baseUrl, "http://mautic_web");
+    assert.equal(config.transportSecurityWarning.level, "warning");
     assert.equal(config.allowMaintenanceCommands, true);
     assert.equal(config.allowWorkspaceRead, true);
     assert.equal(config.allowWorkspaceWrite, true);
@@ -71,6 +73,12 @@ test("local stack config can explicitly opt into maintenance and workspace stagi
       "plugins:reload",
     ]);
   });
+});
+
+test("transport warning distinguishes HTTPS, private HTTP, and routable HTTP", () => {
+  assert.equal(transportSecurityWarning("https://mautic.example.com"), null);
+  assert.equal(transportSecurityWarning("http://mautic_web").level, "warning");
+  assert.equal(transportSecurityWarning("http://mautic.example.com").level, "critical");
 });
 
 test("automation commands are separately opt-in", () => {

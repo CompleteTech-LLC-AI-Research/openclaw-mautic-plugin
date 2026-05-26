@@ -35,7 +35,14 @@ Mitigations:
 - Scope `workspaceRoot` and `allowedWorkspaceRoot` to a dedicated staging directory.
 - Run the console bridge only on an internal network and protect it with `MAUTIC_CONSOLE_TOKEN`.
 - Prefer least-privilege Mautic API credentials for production deployments.
+- Use HTTPS for Mautic API access outside trusted loopback or private container networks; Basic auth credentials are sent on API requests.
 - Keep secrets in environment variables or the platform secret store, not in plugin UI config.
+
+## Transport Security
+
+The Mautic API tools use the configured `baseUrl` and send Basic auth credentials in the HTTP `Authorization` header. Plain HTTP is intended only for trusted local Docker networks, loopback automation, or another private network segment where OpenClaw and Mautic are isolated from untrusted traffic.
+
+For production, hosted, routed, or cross-host deployments, set `baseUrl` to an HTTPS endpoint. Do not send production Mautic credentials through plain HTTP over a public, shared, wireless, or otherwise untrusted network.
 
 ## Console Bridge
 

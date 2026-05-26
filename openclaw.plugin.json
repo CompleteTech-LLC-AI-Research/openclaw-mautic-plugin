@@ -2,7 +2,7 @@
   "id": "mautic-control",
   "name": "Mautic Control",
   "description": "Typed tools for controlled Mautic REST API access, webhook inspection, optional console maintenance, and optional workspace file staging.",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "contracts": {
     "tools": [
       "mautic_status",
@@ -27,60 +27,6 @@
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
-    "properties": {
-      "baseUrl": {
-        "type": "string",
-        "default": "http://mautic_web",
-        "description": "Base URL OpenClaw uses to reach the Mautic web container."
-      },
-      "consoleUrl": {
-        "type": "string",
-        "default": "http://mautic_console:8099/console",
-        "description": "Internal console bridge URL for safe maintenance commands."
-      },
-      "workspaceRoot": {
-        "type": "string",
-        "default": "/workspace/mautic",
-        "description": "Workspace directory exposed to mautic_workspace_file."
-      },
-      "allowedWorkspaceRoot": {
-        "type": "string",
-        "default": "/workspace/mautic",
-        "description": "Hard path guard. workspaceRoot and all file operations must stay under this directory."
-      },
-      "defaultApiVersion": {
-        "type": "string",
-        "enum": ["legacy", "v2"],
-        "default": "legacy",
-        "description": "Default API mapping used by mautic_entity when apiVersion is omitted."
-      },
-      "requestTimeoutSeconds": {
-        "type": "number",
-        "minimum": 5,
-        "maximum": 600,
-        "default": 60,
-        "description": "Timeout for Mautic HTTP API and dashboard probes."
-      },
-      "allowMaintenanceCommands": {
-        "type": "boolean",
-        "default": false,
-        "description": "Allow safe maintenance commands: cache:clear, mautic:cache:clear, and plugins:reload. migrations:status is always allowed."
-      },
-      "allowAutomationJobCommands": {
-        "type": "boolean",
-        "default": false,
-        "description": "Allow safe background job commands: webhooks:process, campaigns:rebuild, campaigns:trigger, and segments:update."
-      },
-      "allowWorkspaceRead": {
-        "type": "boolean",
-        "default": false,
-        "description": "Allow listing and reading files under workspaceRoot. Keep disabled unless the OpenClaw operator is trusted to inspect staged Mautic files."
-      },
-      "allowWorkspaceWrite": {
-        "type": "boolean",
-        "default": false,
-        "description": "Allow writing and deleting files under workspaceRoot. Keep disabled unless the OpenClaw operator is trusted to modify staged Mautic files."
-      }
-    }
+    "properties": {}
   }
 }

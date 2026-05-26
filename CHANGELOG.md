@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.11 - 2026-05-26
+
+- Added explicit Basic auth transport warnings for plain HTTP Mautic API connections.
+- Added `mautic_status` transport warning output for non-HTTPS `baseUrl` configurations.
+
 ## 0.1.10 - 2026-05-26
 
 - Removed the legacy `MAUTIC_CONSOLE_COMMAND_POLICY` environment fallback; console policy should come from plugin config or the explicit capability toggles.

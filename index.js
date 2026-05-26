@@ -40,6 +40,7 @@ export default definePluginEntry({
         return textResult({
           ok: dashboard.ok && apiProbe.ok,
           baseUrl: config.baseUrl,
+          transportSecurityWarning: config.transportSecurityWarning,
           dashboard,
           api: { ok: apiProbe.ok, status: apiProbe.status, statusText: apiProbe.statusText },
           consoleBridgeConfigured: Boolean(config.consoleUrl && config.consoleToken),
