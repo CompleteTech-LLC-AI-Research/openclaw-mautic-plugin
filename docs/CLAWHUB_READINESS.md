@@ -48,7 +48,7 @@ Result:
   "name": "@completetech/openclaw-mautic-plugin",
   "displayName": "Mautic Control",
   "family": "bundle-plugin",
-  "version": "0.1.5"
+  "version": "0.1.6"
 }
 ```
 
@@ -67,7 +67,7 @@ Result: passed. ClawHub detected:
   "name": "@completetech/openclaw-mautic-plugin",
   "displayName": "Mautic Control",
   "family": "bundle-plugin",
-  "version": "0.1.5"
+  "version": "0.1.6"
 }
 ```
 

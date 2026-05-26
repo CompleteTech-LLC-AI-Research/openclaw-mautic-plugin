@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.6 - 2026-05-26
+
+- Improved the README console bridge section for clearer ClawHub rendering.
+- Clarified that only the console-command tool requires the private bridge.
+
 ## 0.1.5 - 2026-05-26
 
 - Improved the README security defaults section for clearer ClawHub rendering.

@@ -126,14 +126,19 @@ Console requests are checked twice: first by the plugin allowlist, then by the o
 
 ## Console Bridge
 
-`mautic_console` requires `mautic/console-bridge.php`. All other tools can run without the bridge.
+The console bridge is optional. It is needed only for the console-command tool; API, entity, webhook, status, and workspace tools can run without it.
 
-Bridge requirements:
+Use the included bridge file only as a private internal endpoint between OpenClaw and Mautic.
 
-- Run it only on a private network reachable by OpenClaw.
-- Protect it with `MAUTIC_CONSOLE_TOKEN`.
-- Do not expose it directly to the public internet.
-- Keep command access limited to the plugin's documented allowlist.
+| Requirement | Production Guidance |
+| --- | --- |
+| Bridge file | Deploy `mautic/console-bridge.php` only when console commands are required. |
+| Network | Keep the bridge on a private network reachable by OpenClaw. |
+| Authentication | Protect every request with `MAUTIC_CONSOLE_TOKEN`. |
+| Public access | Do not expose the bridge directly to the public internet. |
+| Command scope | Keep execution limited to the plugin and bridge allowlists. |
+
+Without the bridge, disable or ignore `mautic_console`; the rest of the plugin remains usable.
 
 ## Local Docker Stack
 
