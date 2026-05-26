@@ -31,20 +31,14 @@ const CONSOLE_COMMANDS = [
   "segments:update",
   "plugins:reload",
 ];
+const CONSOLE_STATUS_COMMANDS = ["migrations:status"];
+const CONSOLE_MAINTENANCE_COMMANDS = ["cache:clear", "mautic:cache:clear", "plugins:reload"];
+const CONSOLE_AUTOMATION_COMMANDS = ["webhooks:process", "campaigns:rebuild", "campaigns:trigger", "segments:update"];
 const CONSOLE_COMMAND_POLICIES = ["readOnly", "maintenance", "automation", "allSafe", "custom"];
 const CONSOLE_POLICY_COMMANDS = {
-  readOnly: ["migrations:status"],
-  maintenance: ["migrations:status", "cache:clear", "mautic:cache:clear", "plugins:reload"],
-  automation: [
-    "migrations:status",
-    "cache:clear",
-    "mautic:cache:clear",
-    "plugins:reload",
-    "webhooks:process",
-    "campaigns:rebuild",
-    "campaigns:trigger",
-    "segments:update",
-  ],
+  readOnly: CONSOLE_STATUS_COMMANDS,
+  maintenance: [...CONSOLE_STATUS_COMMANDS, ...CONSOLE_MAINTENANCE_COMMANDS],
+  automation: [...CONSOLE_STATUS_COMMANDS, ...CONSOLE_MAINTENANCE_COMMANDS, ...CONSOLE_AUTOMATION_COMMANDS],
   allSafe: CONSOLE_COMMANDS,
 };
 const CONSOLE_GROUP_COMMANDS = {
@@ -68,7 +62,8 @@ const DEFAULT_CONFIG = {
   allowedWorkspaceRoot: "/workspace/mautic",
   defaultApiVersion: "legacy",
   requestTimeoutSeconds: 60,
-  consoleCommandPolicy: "maintenance",
+  allowMaintenanceCommands: true,
+  allowAutomationJobCommands: false,
 };
 const REQUEST_TIMEOUT_MIN_SECONDS = 5;
 const REQUEST_TIMEOUT_MAX_SECONDS = 600;
@@ -98,6 +93,16 @@ function pickEnum(value, allowed, fallback) {
   return allowed.includes(value) ? value : fallback;
 }
 
+function pickBoolean(value, fallback) {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (["1", "true", "yes", "on"].includes(normalized)) return true;
+    if (["0", "false", "no", "off"].includes(normalized)) return false;
+  }
+  return fallback;
+}
+
 function uniqueSafeCommands(commands) {
   return commands.filter((command, index) => CONSOLE_COMMANDS.includes(command) && commands.indexOf(command) === index);
 }
@@ -115,16 +120,47 @@ function commandsFromGroups(groups) {
   return uniqueSafeCommands(commands);
 }
 
-function resolveConsoleCommands(pluginConfig) {
+function resolveLegacyConsolePolicy(pluginConfig) {
   const policy = pickEnum(
     pluginConfig.consoleCommandPolicy || process.env.MAUTIC_CONSOLE_COMMAND_POLICY,
     CONSOLE_COMMAND_POLICIES,
-    DEFAULT_CONFIG.consoleCommandPolicy,
+    "maintenance",
   );
   const commands = policy === "custom"
     ? commandsFromGroups(pluginConfig.consoleCommandGroups)
     : CONSOLE_POLICY_COMMANDS[policy];
-  return { policy, commands: uniqueSafeCommands(commands || []) };
+  return { mode: "legacyPolicy", policy, commands: uniqueSafeCommands(commands || []) };
+}
+
+function resolveConsoleCommands(pluginConfig) {
+  const hasToggleConfig = Object.prototype.hasOwnProperty.call(pluginConfig, "allowMaintenanceCommands")
+    || Object.prototype.hasOwnProperty.call(pluginConfig, "allowAutomationJobCommands")
+    || process.env.MAUTIC_ALLOW_MAINTENANCE_COMMANDS !== undefined
+    || process.env.MAUTIC_ALLOW_AUTOMATION_JOB_COMMANDS !== undefined;
+  const hasLegacyConfig = Object.prototype.hasOwnProperty.call(pluginConfig, "consoleCommandPolicy")
+    || Object.prototype.hasOwnProperty.call(pluginConfig, "consoleCommandGroups")
+    || process.env.MAUTIC_CONSOLE_COMMAND_POLICY !== undefined;
+  if (!hasToggleConfig && hasLegacyConfig) {
+    return resolveLegacyConsolePolicy(pluginConfig);
+  }
+
+  const allowMaintenanceCommands = pickBoolean(
+    pluginConfig.allowMaintenanceCommands ?? process.env.MAUTIC_ALLOW_MAINTENANCE_COMMANDS,
+    DEFAULT_CONFIG.allowMaintenanceCommands,
+  );
+  const allowAutomationJobCommands = pickBoolean(
+    pluginConfig.allowAutomationJobCommands ?? process.env.MAUTIC_ALLOW_AUTOMATION_JOB_COMMANDS,
+    DEFAULT_CONFIG.allowAutomationJobCommands,
+  );
+  const commands = [...CONSOLE_STATUS_COMMANDS];
+  if (allowMaintenanceCommands) commands.push(...CONSOLE_MAINTENANCE_COMMANDS);
+  if (allowAutomationJobCommands) commands.push(...CONSOLE_AUTOMATION_COMMANDS);
+  return {
+    mode: "capabilityToggles",
+    allowMaintenanceCommands,
+    allowAutomationJobCommands,
+    commands: uniqueSafeCommands(commands),
+  };
 }
 
 function stripTrailingSlash(value) {
@@ -160,6 +196,9 @@ function getRuntimeConfig(api) {
       REQUEST_TIMEOUT_MIN_SECONDS,
       REQUEST_TIMEOUT_MAX_SECONDS,
     ),
+    consolePermissionMode: consolePolicy.mode,
+    allowMaintenanceCommands: consolePolicy.allowMaintenanceCommands,
+    allowAutomationJobCommands: consolePolicy.allowAutomationJobCommands,
     consoleCommandPolicy: consolePolicy.policy,
     allowedConsoleCommands: consolePolicy.commands,
   };
@@ -311,7 +350,10 @@ export default definePluginEntry({
           allowedWorkspaceRoot: config.allowedWorkspaceRoot,
           defaultApiVersion: config.defaultApiVersion,
           requestTimeoutSeconds: config.requestTimeoutSeconds,
-          consoleCommandPolicy: config.consoleCommandPolicy,
+          consolePermissionMode: config.consolePermissionMode,
+          allowMaintenanceCommands: config.allowMaintenanceCommands,
+          allowAutomationJobCommands: config.allowAutomationJobCommands,
+          legacyConsoleCommandPolicy: config.consoleCommandPolicy,
           allowedConsoleCommands: config.allowedConsoleCommands,
         });
       },

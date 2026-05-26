@@ -61,72 +61,15 @@
         "default": 60,
         "description": "Timeout for Mautic HTTP API and dashboard probes."
       },
-      "consoleCommandPolicy": {
-        "type": "string",
-        "enum": ["readOnly", "maintenance", "automation", "allSafe", "custom"],
-        "default": "maintenance",
-        "description": "Preset for safe Mautic console commands. Use custom only when enabling individual grouped toggles below."
+      "allowMaintenanceCommands": {
+        "type": "boolean",
+        "default": true,
+        "description": "Allow safe maintenance commands: cache:clear, mautic:cache:clear, and plugins:reload. migrations:status is always allowed."
       },
-      "consoleCommandGroups": {
-        "type": "object",
-        "additionalProperties": false,
-        "description": "Advanced custom console command toggles. Used only when consoleCommandPolicy is custom.",
-        "properties": {
-          "maintenance": {
-            "type": "object",
-            "additionalProperties": false,
-            "description": "Safe maintenance commands.",
-            "properties": {
-              "cacheClear": {
-                "type": "boolean",
-                "default": false,
-                "description": "Allow cache:clear."
-              },
-              "mauticCacheClear": {
-                "type": "boolean",
-                "default": false,
-                "description": "Allow mautic:cache:clear."
-              },
-              "migrationsStatus": {
-                "type": "boolean",
-                "default": false,
-                "description": "Allow migrations:status."
-              },
-              "pluginsReload": {
-                "type": "boolean",
-                "default": false,
-                "description": "Allow plugins:reload."
-              }
-            }
-          },
-          "automation": {
-            "type": "object",
-            "additionalProperties": false,
-            "description": "Safe background automation commands.",
-            "properties": {
-              "webhooksProcess": {
-                "type": "boolean",
-                "default": false,
-                "description": "Allow webhooks:process."
-              },
-              "campaignsRebuild": {
-                "type": "boolean",
-                "default": false,
-                "description": "Allow campaigns:rebuild."
-              },
-              "campaignsTrigger": {
-                "type": "boolean",
-                "default": false,
-                "description": "Allow campaigns:trigger."
-              },
-              "segmentsUpdate": {
-                "type": "boolean",
-                "default": false,
-                "description": "Allow segments:update."
-              }
-            }
-          }
-        }
+      "allowAutomationJobCommands": {
+        "type": "boolean",
+        "default": false,
+        "description": "Allow safe background job commands: webhooks:process, campaigns:rebuild, campaigns:trigger, and segments:update."
       }
     }
   }

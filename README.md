@@ -21,31 +21,18 @@ OpenClaw shows these non-secret fields in the plugin settings UI under `mautic-c
 - `allowedWorkspaceRoot`, default `/workspace/mautic`
 - `defaultApiVersion`, `legacy` or `v2`, default `legacy`
 - `requestTimeoutSeconds`, 5 to 600 seconds, default `60`
-- `consoleCommandPolicy`, default `maintenance`
-- `consoleCommandGroups`, advanced toggles used only when `consoleCommandPolicy` is `custom`
+- `allowMaintenanceCommands`, default `true`
+- `allowAutomationJobCommands`, default `false`
 
 The runtime resolves plugin UI config first, environment variables second, and built-in defaults last.
 
-Console command access is controlled by a policy preset:
+Console command access uses a status-only baseline plus two capability toggles:
 
-- `readOnly`: allows `migrations:status` only.
-- `maintenance`: allows migration status, cache clears, and plugin reload. This is the recommended default.
-- `automation`: allows maintenance commands plus webhook, campaign, and segment background jobs.
-- `allSafe`: allows every command in the plugin's hardcoded safe list.
-- `custom`: ignores presets and uses the grouped boolean toggles under `consoleCommandGroups`.
+- `migrations:status` is always allowed so OpenClaw can check Mautic migration state.
+- `allowMaintenanceCommands` enables `cache:clear`, `mautic:cache:clear`, and `plugins:reload`.
+- `allowAutomationJobCommands` enables `webhooks:process`, `campaigns:rebuild`, `campaigns:trigger`, and `segments:update`.
 
-For `custom`, enable only the grouped toggles you want:
-
-- `consoleCommandGroups.maintenance.cacheClear`
-- `consoleCommandGroups.maintenance.mauticCacheClear`
-- `consoleCommandGroups.maintenance.migrationsStatus`
-- `consoleCommandGroups.maintenance.pluginsReload`
-- `consoleCommandGroups.automation.webhooksProcess`
-- `consoleCommandGroups.automation.campaignsRebuild`
-- `consoleCommandGroups.automation.campaignsTrigger`
-- `consoleCommandGroups.automation.segmentsUpdate`
-
-Raw console command strings are internal and safety-gated. Every resolved policy or custom toggle is intersected with the plugin's hardcoded safe allowlist before `mautic_console` runs anything.
+Legacy `consoleCommandPolicy` and `consoleCommandGroups` values are still accepted if an older deployment already has them, but they are not shown in the default settings UI. Raw console command strings are internal and safety-gated. Every resolved toggle or legacy policy is intersected with the plugin's hardcoded safe allowlist before `mautic_console` runs anything.
 
 Secrets stay out of the plugin UI. The installed OpenClaw runtime exposes plugin config as `api.pluginConfig`, but its canonical SecretRef credential surface does not include this custom plugin's Mautic password or console-token paths. This plugin therefore does not add plaintext secret fields. Provide credentials through the OpenClaw container environment:
 
@@ -53,7 +40,7 @@ Secrets stay out of the plugin UI. The installed OpenClaw runtime exposes plugin
 - `MAUTIC_API_PASSWORD`
 - `MAUTIC_CONSOLE_TOKEN`
 
-Optional environment fallbacks for non-secret settings are `MAUTIC_BASE_URL`, `MAUTIC_CONSOLE_URL`, `MAUTIC_WORKSPACE_DIR`, `MAUTIC_ALLOWED_WORKSPACE_ROOT`, `MAUTIC_DEFAULT_API_VERSION`, `MAUTIC_REQUEST_TIMEOUT_SECONDS`, and `MAUTIC_CONSOLE_COMMAND_POLICY`.
+Optional environment fallbacks for non-secret settings are `MAUTIC_BASE_URL`, `MAUTIC_CONSOLE_URL`, `MAUTIC_WORKSPACE_DIR`, `MAUTIC_ALLOWED_WORKSPACE_ROOT`, `MAUTIC_DEFAULT_API_VERSION`, `MAUTIC_REQUEST_TIMEOUT_SECONDS`, `MAUTIC_ALLOW_MAINTENANCE_COMMANDS`, and `MAUTIC_ALLOW_AUTOMATION_JOB_COMMANDS`. `MAUTIC_CONSOLE_COMMAND_POLICY` remains as a legacy fallback only.
 
 The stack enables Mautic Basic auth only for this loopback Docker deployment. Do not expose these services publicly.
 
