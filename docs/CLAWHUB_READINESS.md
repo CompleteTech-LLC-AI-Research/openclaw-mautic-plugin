@@ -50,11 +50,7 @@ GitHub reports the repository exists but is private. ClawHub community publishin
 Local-folder dry run with explicit source metadata:
 
 ```bash
-COMMIT="$(git rev-parse HEAD)"
-npm exec --yes clawhub -- package publish . --dry-run --json \
-  --source-repo CompleteTech-LLC-AI-Research/openclaw-mautic-plugin \
-  --source-commit "$COMMIT" \
-  --source-ref main
+npm run clawhub:dry-run
 ```
 
 Result: passed. ClawHub detected:

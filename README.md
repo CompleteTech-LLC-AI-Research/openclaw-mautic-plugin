@@ -123,7 +123,19 @@ npm run live:smoke
 docker compose exec -T openclaw sh -lc 'openclaw security audit --deep --json'
 ```
 
-Before publishing to ClawHub, run the ClawHub package dry-run command available in the target OpenClaw installation and address all critical findings.
+Before publishing to ClawHub, run the package dry-run wrapper and address all critical findings:
+
+```bash
+npm run clawhub:dry-run
+```
+
+To publish after source visibility/review access is resolved and ClawHub login is configured:
+
+```bash
+npm run clawhub:publish
+```
+
+Optional environment variables for publishing are `CLAWHUB_OWNER`, `CLAWHUB_CHANGELOG`, `CLAWHUB_SOURCE_REPO`, `CLAWHUB_SOURCE_REF`, and `CLAWHUB_CLAWSCAN_NOTE`.
 
 ## Known Limits
 
