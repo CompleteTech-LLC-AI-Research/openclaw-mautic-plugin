@@ -1,6 +1,6 @@
 {
   "name": "@completetech/openclaw-mautic-plugin",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "OpenClaw plugin for controlled Mautic API, webhook, console bridge, and workspace operations.",
   "type": "module",
   "private": false,

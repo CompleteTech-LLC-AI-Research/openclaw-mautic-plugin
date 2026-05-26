@@ -1,0 +1,37 @@
+name: Publish to ClawHub
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Check package contents
+        run: npm run package:check
+
+      - name: Dry-run ClawHub package
+        run: npm run clawhub:dry-run
+
+      - name: Publish ClawHub package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm run clawhub:publish

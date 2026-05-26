@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.8 - 2026-05-26
+
+- Added GitHub Actions OIDC trusted publishing for ClawHub.
+- Added a manual ClawHub publish workflow that runs lint, tests, package validation, dry run, and publish.
+- Documented trusted publisher configuration and verification.
+
 ## 0.1.7 - 2026-05-26
 
 - Improved the README production setup section for cleaner ClawHub rendering.

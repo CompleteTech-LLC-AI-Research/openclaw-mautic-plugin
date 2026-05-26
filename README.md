@@ -193,6 +193,7 @@ docker compose exec -T openclaw sh -lc 'openclaw security audit --deep --json'
 The package is published on ClawHub as `@completetech/openclaw-mautic-plugin`.
 
 Releases are published as a ClawPack npm-pack artifact, not the older legacy zip artifact.
+Trusted publishing uses GitHub Actions OIDC; no long-lived ClawHub token is stored in repository secrets.
 
 For a future release:
 
@@ -202,6 +203,8 @@ npm run clawhub:publish
 ```
 
 Optional publish environment variables are `CLAWHUB_OWNER`, `CLAWHUB_CHANGELOG`, `CLAWHUB_SOURCE_REPO`, `CLAWHUB_SOURCE_REF`, `CLAWHUB_TAGS`, `CLAWHUB_CLAWSCAN_NOTE`, and `CLAWHUB_ALLOW_PRIVATE_SOURCE`.
+
+See `docs/TRUSTED_PUBLISHING.md` for the trusted publisher workflow and verification commands.
 
 ## Limits
 
