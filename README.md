@@ -2,6 +2,10 @@
 
 Controlled Mautic CRM operations from OpenClaw: typed API tools, webhook discovery, conservative console maintenance, and guarded workspace staging.
 
+Status: pre-1.0 (package version `0.1.13`), published on ClawHub. It is for operators who let an OpenClaw agent work in a Mautic 7.x instance and want that access narrow and policy-gated.
+
+[![CI](https://github.com/CompleteTech-LLC-AI-Research/openclaw-mautic-plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/CompleteTech-LLC-AI-Research/openclaw-mautic-plugin/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-14b8a6?style=flat-square)](LICENSE)
+
 ![Mautic Control overview](docs/openclaw-mautic-control.png)
 
 | Package | Runtime | Mautic Target | OpenClaw |
@@ -207,3 +211,7 @@ See `docs/TRUSTED_PUBLISHING.md` for the trusted publisher workflow and verifica
 - `mautic_console` cannot run arbitrary shell or Mautic console commands.
 - `mautic_workspace_file` is for guarded staging workflows, not full filesystem access.
 - ClawHub scan status may be pending immediately after a new release is published.
+
+## License
+
+MIT. See [LICENSE](LICENSE). Security reports: see [SECURITY.md](SECURITY.md).
