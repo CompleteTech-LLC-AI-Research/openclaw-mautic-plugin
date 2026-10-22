@@ -7,14 +7,15 @@ import {
   METHODS,
   REQUEST_TIMEOUT_MAX_SECONDS,
   REQUEST_TIMEOUT_MIN_SECONDS,
-  assertMauticApiPath,
   assertPathWithinRoot,
   boundedNumber,
   fetchWithTimeout,
   getRuntimeConfig,
   legacyEntityRequest,
   mauticFetch,
+  normalizeMauticApiPath,
   parseCreatedId,
+  probeMauticApi,
   requireId,
   safeWorkspacePath,
   schema,
@@ -36,13 +37,13 @@ export default definePluginEntry({
         const dashboard = await fetchWithTimeout(`${config.baseUrl}/s/dashboard`, { redirect: "manual" }, config.requestTimeoutSeconds)
           .then((response) => ({ ok: response.status === 200 || response.status === 302, status: response.status, location: response.headers.get("location") }))
           .catch((error) => ({ ok: false, error: error.message }));
-        const apiProbe = await mauticFetch(config, "/api/contacts", { query: { limit: 1 } });
+        const apiProbe = await probeMauticApi(config);
         return textResult({
           ok: dashboard.ok && apiProbe.ok,
           baseUrl: config.baseUrl,
           transportSecurityWarning: config.transportSecurityWarning,
           dashboard,
-          api: { ok: apiProbe.ok, status: apiProbe.status, statusText: apiProbe.statusText },
+          api: apiProbe,
           consoleBridgeConfigured: Boolean(config.consoleUrl && config.consoleToken),
           workspaceRoot: config.workspaceRoot,
           allowedWorkspaceRoot: config.allowedWorkspaceRoot,
@@ -64,13 +65,12 @@ export default definePluginEntry({
       description: "Send an authenticated request to a Mautic API path under /api or /api/v2.",
       parameters: schema({
         method: { type: "string", enum: METHODS, default: "GET" },
-        path: { type: "string", description: "Mautic path starting with /api or /api/v2." },
+        path: { type: "string", description: "Canonical Mautic path under /api or /api/v2 (no dot segments, encoded separators, query strings, or absolute URLs; use `query` for parameters)." },
         query: { type: "object", additionalProperties: true },
         body: { type: "object", additionalProperties: true },
       }, ["path"]),
       async execute(_id, params) {
-        const requestPath = String(params.path || "");
-        assertMauticApiPath(requestPath);
+        const requestPath = normalizeMauticApiPath(String(params.path || ""));
         const result = await mauticFetch(getRuntimeConfig(api), requestPath, {
           method: params.method || "GET",
           query: params.query,
@@ -86,7 +86,7 @@ export default definePluginEntry({
       parameters: schema({
         entity: { type: "string", enum: ENTITY_NAMES },
         action: { type: "string", enum: ["list", "get", "create", "update", "delete"] },
-        id: { anyOf: [{ type: "string" }, { type: "number" }] },
+        id: { anyOf: [{ type: "string", pattern: "^[1-9][0-9]*$" }, { type: "integer", minimum: 1 }], description: "Positive integer Mautic entity id." },
         apiVersion: { type: "string", enum: ["legacy", "v2"], default: "legacy" },
         query: { type: "object", additionalProperties: true },
         body: { type: "object", additionalProperties: true },

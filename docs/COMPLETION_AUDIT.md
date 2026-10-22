@@ -22,7 +22,7 @@ The plugin package is production-ready for ClawHub package review from the publi
 | Threat model documented | `SECURITY.md` primary risks and mitigations | Complete |
 | Dangerous capabilities opt-in by default | `openclaw.plugin.json` and `lib/runtime.js` default maintenance, automation, workspace read/write to false | Complete |
 | Preserve local maintenance behavior | local stack bootstrap explicitly sets `allowMaintenanceCommands=true`, `allowAutomationJobCommands=false` | Complete |
-| API path restriction | `assertMauticApiPath` in `lib/runtime.js`; covered by `test/runtime.test.js` | Complete |
+| API path restriction | `normalizeMauticApiPath` / `assertMauticApiPath` and `assertUrlUnderApiBase` in `lib/runtime.js`; covered by `test/runtime.test.js` | Complete |
 | Workspace path guards | `safeWorkspacePath`, `assertPathWithinRoot`; covered by `test/runtime.test.js` | Complete |
 | Workspace read/write/delete policy | `allowWorkspaceRead`, `allowWorkspaceWrite`; live smoke writes/reads a nested file | Complete |
 | Console command allowlist | hardcoded command list plus capability toggles; covered by unit and live smoke tests | Complete |

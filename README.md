@@ -26,7 +26,7 @@ After installation, configure the non-secret connection settings in OpenClaw and
 | --- | --- | --- |
 | Check Mautic reachability and policy | `mautic_status` | Read-only status check |
 | Work with Mautic API resources | `mautic_request`, `mautic_entity` | Credentials required, API paths only |
-| Discover webhook trigger names | `mautic_webhook_triggers` | No credentials required |
+| Discover webhook trigger names | `mautic_webhook_triggers` | Credentials required (calls `/api/hooks/triggers`) |
 | Run maintenance commands | `mautic_console` | Optional bridge, allowlisted commands only |
 | Stage import/export files | `mautic_workspace_file` | Off by default, bounded to one workspace root |
 
@@ -71,10 +71,10 @@ Plain `http://` is acceptable only for a trusted loopback address or private con
 
 | Tool | What It Does | Requires |
 | --- | --- | --- |
-| `mautic_status` | Checks dashboard reachability, API auth, resolved config, transport policy, command policy, and workspace policy. | API credentials for auth check |
-| `mautic_request` | Sends authenticated requests to Mautic paths under `/api` or `/api/v2`. | API credentials |
-| `mautic_entity` | Lists, reads, creates, updates, and deletes supported Mautic resources. | API credentials |
-| `mautic_webhook_triggers` | Lists valid Mautic webhook trigger events. | Plugin only |
+| `mautic_status` | Checks dashboard reachability, API auth, resolved config, transport policy, command policy, and workspace policy. Missing credentials, unsafe transport, or network errors are reported in `api.error` with `ok: false` instead of failing the tool. | API credentials for auth check |
+| `mautic_request` | Sends authenticated requests to canonical Mautic paths under `/api` or `/api/v2`. Dot segments (`..`, `.`), percent-encoded traversal or separators, backslashes, empty segments, query strings, fragments, and absolute URLs are rejected; pass query parameters through `query`. | API credentials |
+| `mautic_entity` | Lists, reads, creates, updates, and deletes supported Mautic resources. Entity ids must be positive integers. | API credentials |
+| `mautic_webhook_triggers` | Lists valid Mautic webhook trigger events. | API credentials |
 | `mautic_console` | Runs allowlisted Mautic console commands through the private bridge. | Console bridge and token |
 | `mautic_workspace_file` | Lists, reads, writes, or deletes files under a guarded workspace root. | Workspace toggles |
 
