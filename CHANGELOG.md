@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.14 - 2026-10-22
 
 - Security: `mautic_request` now requires a canonical path under `/api`. Previously only the prefix was checked, so `/api/../s/dashboard` was accepted and resolved to `/s/dashboard` on the Mautic host. Dot segments, percent-encoded traversal and separators, backslashes, empty segments, query strings, fragments, and absolute URLs are rejected, and every built request URL is re-checked against the configured base `/api` path.
 - Security: `mautic_entity` ids must be positive integers and are URL-encoded before use in request paths.

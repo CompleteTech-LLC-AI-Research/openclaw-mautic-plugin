@@ -1,6 +1,6 @@
 {
   "name": "@completetech/openclaw-mautic-plugin",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "Controlled Mautic CRM operations for OpenClaw, with guarded API, webhook, console, and workspace tools.",
   "type": "module",
   "private": false,
