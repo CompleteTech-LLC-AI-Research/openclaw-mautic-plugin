@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
+import path from "node:path";
 import test from "node:test";
 import {
   assertMauticApiPath,
+  buildUrl,
+  mauticFetch,
+  normalizeMauticApiPath,
+  probeMauticApi,
   assertPathWithinRoot,
   assertSafeMauticTransport,
   getRuntimeConfig,
@@ -120,7 +125,10 @@ test("mautic_request only accepts Mautic API paths", () => {
 });
 
 test("workspace paths cannot escape the configured root", () => {
-  assert.equal(safeWorkspacePath("/workspace/mautic", "imports/file.csv"), "/workspace/mautic/imports/file.csv");
+  assert.equal(
+    safeWorkspacePath("/workspace/mautic", "imports/file.csv"),
+    path.join(path.resolve("/workspace/mautic"), "imports", "file.csv"),
+  );
   assert.throws(() => safeWorkspacePath("/workspace/mautic", "../secrets.txt"), /escapes/);
   assert.throws(
     () => assertPathWithinRoot("/workspace/mautic2/file.txt", "/workspace/mautic", "outside"),
@@ -132,4 +140,64 @@ test("entity helpers enforce ids and map legacy and v2 endpoints", () => {
   assert.deepEqual(legacyEntityRequest("contacts", "create"), { method: "POST", path: "/api/contacts/new" });
   assert.deepEqual(v2EntityRequest("contacts", "update", 123), { method: "PATCH", path: "/api/v2/contacts/123" });
   assert.throws(() => requireId("delete"), /id is required/);
+});
+
+test("mautic_request rejects path traversal and non-canonical API paths", () => {
+  const rejected = [
+    "/api/../s/dashboard",
+    "/api/./../s/dashboard",
+    "/api/contacts/../../s/dashboard",
+    "/api/%2e%2e/s/dashboard",
+    "/api/%2E%2E/s/dashboard",
+    "/api/.%2e/s/dashboard",
+    "/api/%252e%252e/s/dashboard",
+    "/api/./contacts",
+    "/api/contacts/.",
+    "/api/..",
+    "/api\\..\\s\\dashboard",
+    "/api/..\\s/dashboard",
+    "/api/%5c../s/dashboard",
+    "/api/%2f../s/dashboard",
+    "/api//contacts",
+    "//evil.example.com/api/contacts",
+    "https://evil.example.com/api/contacts",
+    "api/contacts",
+    "/apifoo",
+    "/api/contacts?x=1",
+    "/api/contacts#frag",
+    "/api/contacts\u0000",
+    "",
+  ];
+  for (const candidate of rejected) {
+    assert.throws(() => assertMauticApiPath(candidate), /mautic_request path/, `expected rejection: ${JSON.stringify(candidate)}`);
+  }
+  assert.equal(normalizeMauticApiPath("/api/contacts/"), "/api/contacts/");
+  assert.equal(normalizeMauticApiPath("/api/v2/contacts"), "/api/v2/contacts");
+  assert.equal(normalizeMauticApiPath("/api/contacts/1/edit"), "/api/contacts/1/edit");
+});
+
+test("built request URLs stay under the configured base /api path", async () => {
+  const config = { baseUrl: "https://mautic.example.com/sub", username: "u", password: "p", requestTimeoutSeconds: 5 };
+  await assert.rejects(() => mauticFetch(config, "/api/../s/dashboard"), /mautic_request path|outside/);
+  assert.equal(buildUrl(config.baseUrl, "/api/contacts").pathname, "/sub/api/contacts");
+});
+
+test("entity ids must be positive integers and are never interpolated raw", () => {
+  assert.deepEqual(legacyEntityRequest("contacts", "get", "42"), { method: "GET", path: "/api/contacts/42" });
+  assert.deepEqual(v2EntityRequest("contacts", "delete", 7), { method: "DELETE", path: "/api/v2/contacts/7" });
+  for (const bad of ["..", "../../s/dashboard", "1/../../s", "%2e%2e", "1?x=1", "1#x", "-1", "0", "1.5", "abc", 1.5, -3, 0, NaN]) {
+    assert.throws(() => requireId("get", bad), /positive integer/, `expected rejection: ${String(bad)}`);
+    assert.throws(() => legacyEntityRequest("contacts", "get", bad), /positive integer/);
+    assert.throws(() => v2EntityRequest("contacts", "update", bad), /positive integer/);
+  }
+  assert.doesNotThrow(() => requireId("list"));
+});
+
+test("status API probe reports failures instead of throwing", async () => {
+  const missingCreds = await probeMauticApi({ baseUrl: "https://mautic.example.com", username: "", password: "", requestTimeoutSeconds: 5 });
+  assert.equal(missingCreds.ok, false);
+  assert.match(missingCreds.error, /MAUTIC_API_USERNAME/);
+  const unsafe = await probeMauticApi({ baseUrl: "http://mautic.example.com", username: "u", password: "p", requestTimeoutSeconds: 5 });
+  assert.equal(unsafe.ok, false);
+  assert.match(unsafe.error, /Refusing to send/);
 });
