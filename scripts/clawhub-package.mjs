@@ -10,6 +10,9 @@ const publish = args.has("--publish");
 const allowDirty = args.has("--allow-dirty");
 const json = !args.has("--no-json");
 const allowPrivateSource = process.env.CLAWHUB_ALLOW_PRIVATE_SOURCE === "1";
+// Pinned: clawhub >=0.19 removed `package publish --clawscan-note`. 0.18.0 matches the
+// openclaw/clawhub reusable workflow tag used by .github/workflows/clawhub-publish.yml.
+const CLAWHUB_CLI = process.env.CLAWHUB_CLI || "clawhub@0.18.0";
 
 function run(command, commandArgs, options = {}) {
   return spawnSync(command, commandArgs, {
@@ -71,7 +74,7 @@ const packDir = mkdtempSync(join(tmpdir(), "mautic-control-clawpack-"));
 const packResult = run("npm", [
   "exec",
   "--yes",
-  "clawhub",
+  CLAWHUB_CLI,
   "--",
   "package",
   "pack",
@@ -95,7 +98,7 @@ try {
 const command = [
   "exec",
   "--yes",
-  "clawhub",
+  CLAWHUB_CLI,
   "--",
   "package",
   "publish",

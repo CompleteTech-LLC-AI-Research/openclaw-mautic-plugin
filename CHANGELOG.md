@@ -1,12 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.1.14 - 2026-10-22
 
 - Security: `mautic_request` now requires a canonical path under `/api`. Previously only the prefix was checked, so `/api/../s/dashboard` was accepted and resolved to `/s/dashboard` on the Mautic host. Dot segments, percent-encoded traversal and separators, backslashes, empty segments, query strings, fragments, and absolute URLs are rejected, and every built request URL is re-checked against the configured base `/api` path.
 - Security: `mautic_entity` ids must be positive integers and are URL-encoded before use in request paths.
 - `mautic_status` reports API probe failures (missing credentials, unsafe transport, network errors, timeouts) in `api.error` instead of throwing.
 - README: `mautic_webhook_triggers` requires API credentials (it calls the authenticated `/api/hooks/triggers` endpoint).
 - Tests: workspace path test is now portable to Windows.
+- Release tooling: `scripts/clawhub-package.mjs` pins the ClawHub CLI to 0.18.0 (override with `CLAWHUB_CLI`); newer CLI releases removed `--clawscan-note`, which broke `npm run clawhub:dry-run` and the publish workflow validate job.
 
 ## 0.1.13 - 2026-05-26
 

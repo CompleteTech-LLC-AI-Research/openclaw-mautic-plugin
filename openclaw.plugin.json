@@ -2,7 +2,7 @@
   "id": "mautic-control",
   "name": "Mautic Control",
   "description": "Controlled Mautic CRM operations for OpenClaw with guarded API, webhook, console, and workspace tools.",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "contracts": {
     "tools": [
       "mautic_status",
